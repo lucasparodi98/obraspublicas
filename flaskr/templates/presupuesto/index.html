@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}{{ title }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  div.dataTables_length {
+    margin-right: 20em;
+  }
+
+  div.dtsp-title{
+    display: none;
+  }
+
+  .dtsp-searchPanes table {
+    display:table;
+  }
+
+  div.dtsp-panesContainer div.dtsp-searchPanes div.dtsp-searchPane {
+    margin-top: 0px !important;
+}
+</style>
+
+  <br>
+  <table id="presupuesto_table" class="table table-bordered table-sm table-hover">
+    <thead>
+      <tr class="table-primary text-center align-middle" style="font-size: 0.90em;">
+        <th>ID</th>
+        <th>Código Único</th>
+        <th>Fecha Registro</th>
+        <th>Año</th>
+        <th>Bautizo del Proyecto</th>
+        <th>IP Madre</th>
+        <th>Grupo Monto</th>
+        <th>Monto IGV</th>
+        <th>Monto Sin IGV</th>
+        <th>Prioridad</th>
+        <th>Estado</th>
+        <th>Grupo Gestión</th>
+        <th>Mes Pago Planificado</th>
+        <th>Fecha de Pago 96%</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody style="border: 1px solid black;">
+      {% for i in range(n) %}
+        <tr>
+            <td style="white-space: nowrap;" class="id">{{ presupuestos[i]['id'] }}</td>
+            <td style="white-space: nowrap;" class="cu">{{ presupuestos[i]['cod_unico'] }}</td>
+            <td style="white-space: nowrap;">{{ presupuestos[i]['fecha_creacion'].strftime('%d/%m/%Y') }}</td>
+            <td style="white-space: nowrap;">{{ presupuestos[i]['fecha_creacion'].strftime('%Y') }}</td>
+            <td style="white-space: nowrap;"><div class="largediv200px" style="font-size: small;">{{ presupuestos[i]['bautizo'] }}</div></td>
+            <td style="white-space: nowrap;">{{ presupuestos[i]['ip_madre'] }}</td>
+            <td style="white-space: nowrap;">
+                {{ ('Mayor a 1,000,000' if presupuestos[i]['montoIGV'] > 1000000 else 'Menor igual a 1,000,000' if presupuestos[i]['montoIGV'] <= 1000000 else 'Sin dato') if presupuestos[i]['montoIGV'] else 'Sin dato'}}
+            </td>
+            <td style="white-space: nowrap;">{{ 'S/. {:,.2f}'.format(presupuestos[i]['montoIGV']) if presupuestos[i]['montoIGV'] else 'Sin dato' }}</td>
+            <td style="white-space: nowrap;">{{ 'S/. {:,.2f}'.format(presupuestos[i]['montoIGV']/1.18) if presupuestos[i]['montoIGV'] else 'Sin dato' }}</td>
+            <td style="white-space: nowrap;">{{ presupuestos[i]['prioridad'] }}</td>
+            <td style="white-space: nowrap;"><div class="largediv200px" style="font-size: small;">{{ presupuestos[i]['estado'] }}</div></td>
+            <td style="white-space: nowrap;font-size: small;"><div class="largediv200px" style="font-size: small;">{{ presupuestos[i]['grupo_gestion'] }}</div></td>
+            <td style="white-space: nowrap;">{{ presupuestos[i]['mes_pago_planificado'] }}</td>
+            <td style="white-space: nowrap;">{{ presupuestos[i]['fecha_pago_96'].strftime('%d/%m/%Y') if presupuestos[i]['fecha_pago_96'] else 'Sin dato' }}</td>
+            <td>
+              <a class="action" href="{{ url_for('inf_red.viewAll', id=presupuestos[i]['cod_unico']) }}" title="Ver"><i class="fa-solid fa-eye"></i></a>
+              <a class="action" href="{{ url_for('presupuesto.updatePresupuesto', id=presupuestos[i]['id']) }}" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a class="action comentario" title="Agregar Comentario" id="comentario"><i class="fa-solid fa-message"></i></a>
+            </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+
+
+<link href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/searchpanes/2.2.0/css/searchPanes.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css" rel="stylesheet">
+ 
+  <script>
+    $(document).ready(function () {
+      $('.comentario').click(function(){
+        var $row = $(this).closest("tr");    // Find the row
+        var $id = $row.find(".id").text(); // Find the text
+
+        let comment = prompt("Comentario: ", "");
+        if (comment != null && comment != "") {
+          location.replace('/comentario/presupuesto/'+ $id +'/'+ comment);
+          alert("Comentario Registrado");
+          //document.getElementById("demo").innerHTML = comment;
+        } else {
+          alert("Comentario Cancelado");
+        }
+      });
+      
+      let table = $('#presupuesto_table').DataTable({
+        /*searchPanes:{layout: 'columns-2'},*/
+        columnDefs: [
+            {className: "dt-head-center", targets: "_all"},
+            {     
+              searchPanes: {
+                  show: true,
+                  dtOpts: {scrollY: '100px'}
+              },
+              targets: [3,6,9,10,11,12]
+              },
+              {
+              searchPanes: {
+                  show: false
+              },
+              targets: [0,1,2,5,7,8,13]
+            }
+        ],
+        dom: 'PlBfrtip',
+        buttons: ['excel'],
+        iDisplayLength: 5,
+        orderCellsTop: true,
+        fixedHeader: true,
+        columns: [
+          {data: 'id', orderable: false, searchable: false},
+          {data: 'cod_unico', orderable: true, searchable: true},
+          {data: 'fecha_registro', orderable: true, searchable: false},
+          {data: 'anio', orderable: true, searchable: true},
+          {data: 'bautizo', orderable: false, searchable: true},
+          {data: 'ip_madre', orderable: false, searchable: true},
+          {data: 'grupo_monto', orderable: false, searchable: true},
+          {data: 'montoIGV', orderable: false, searchable: false},
+          {data: 'montoSinIGV', orderable: false, searchable: false},
+          {data: 'prioridad', orderable: false, searchable: true},
+          {data: 'estado', orderable: false, searchable: true},
+          {data: 'grupo_gestion', orderable: false, searchable: true},
+          {data: 'mes_pago_planificado', orderable: false, searchable: true},
+          {data: 'fecha_pago_96', orderable: false, searchable: true},
+          {orderable: false, searchable: false}],
+        language: [
+          {info: "Mostrando _START_ a _END_ de _TOTAL_ entradas" },
+        ]
+      });
+      new $.fn.dataTable.SearchPanes(table, {});
+      table.searchPanes.container().prependTo(table.table().container());
+      table.searchPanes.resizePanes();
+
+    });
+
+  </script>
+{% endblock %}

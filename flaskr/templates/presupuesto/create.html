@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Registrar nueva solicitud de Presupuesto{% endblock %}</h1>
+{% endblock %}
+
+
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data" name="form1">
+        <div class="text-start mb-1-6 wow fadeIn">
+            <h3 class="mb-0 text-primary"><b>Proyecto - Código Unico:</b> {{ cu }}</h3>
+        </div>
+        <p>{{ inf_red['proyecto'] }}</p>
+        <br>
+
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <a class="collapsed card-link link-info" data-bs-toggle="collapse" href="#collapseZero" >
+                        <h4><b>Datos de Gestión Interna</b></h4>
+                    </a>
+                </div>
+                <div id="collapseZero" class="collapse" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <label for="bautizo_corto">Bautizo Abreviado</label>
+                                <input id="bautizo_corto" name="bautizo_corto" class="form-control" value="{{ request.form['bautizo_corto'] }}" placeholder="Bautizo" maxlength="250">
+                            </div>
+                            <div class="col">
+                                <label for="mes_pago_planificado">Mes de Pago Interno</label>
+                                <select id="mes_pago_planificado" name="mes_pago_planificado" class="form-control" value="{{ request.form['mes_pago_planificado'] }}" placeholder="Mes Pago">
+                                    <option selected value>Sin fecha</option>
+                                    {% for mes in list_mes_pago %}
+                                        <option>{{ mes }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label for="semana_pago_interno">Semana Pago Interno</label>
+                                <select id="semana_pago_interno" name="semana_pago_interno" class="form-control" value="{{ request.form['semana_pago_interno'] }}" placeholder="Semana Pago">
+                                    <option selected value>Sin fecha</option>
+                                    <option>Semana 1</option>
+                                    <option>Semana 2</option>
+                                    <option>Semana 3</option>
+                                    <option>Semana 4</option>
+                                    <option>Semana 5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col">
+                <label for="estado">Estado*</label>
+                <select id="estado" name="estado" class="form-select" value="{{ request.form['estado'] }}" 
+                        placeholder="Estado" required>
+                {% for i in range(n_estados) %}
+                    <option style="{{ list_color_estados[i] }}">{{ estados[i]['estado'] }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <label for="fecha_creacion">Fecha Registro</label>
+                <input id="fecha_creacion" name="fecha_creacion" type="date" class="form-control"
+                    value="{{ request.form['fecha_creacion'] or date_now }}"  placeholder="Fecha Registro">
+            </div>
+            <div class="col">
+                <label for="mes_pago_oficial">Mes Pago Oficial</label>
+                <select id="mes_pago_oficial" name="mes_pago_oficial" class="form-control" value="{{ request.form['mes_pago_oficial'] }}" placeholder="Mes Pago">
+                    <option selected value>Sin fecha</option>
+                    {% for mes in list_mes_pago %}
+                        <option>{{ mes }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <label for="semana_pago_oficial">Semana Pago Oficial</label>
+                <select id="semana_pago_oficial" name="semana_pago_oficial" class="form-control" value="{{ request.form['semana_pago_oficial'] }}" placeholder="Semana Pago">
+                    <option selected value>Sin fecha</option>
+                    <option>Semana 1</option>
+                    <option>Semana 2</option>
+                    <option>Semana 3</option>
+                    <option>Semana 4</option>
+                    <option>Semana 5</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div id="accordion">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+            <a class="collapsed card-link link-secondary" data-bs-toggle="collapse" href="#collapseOne" >
+                <h3><b>Datos de la Solicitud de Presupuesto</b></h3>
+            </a>
+            </div>
+            <div id="collapseOne" class="collapse show" data-parent="#accordion">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <label for="bautizo">Bautizo del Proyecto*</label>
+                        <textarea id="bautizo" name="bautizo" class="form-control" value="{{ request.form['bautizo'] }}" placeholder="Bautizo del Proyecto" required></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                <div class="col">
+                    <label for="documento">Documento*</label>
+                    <input id="documento" name="documento" class="form-control" value="{{ request.form['documento'] }}" placeholder="Documento" required>
+                </div>
+                <div class="col">
+                    <label for="fecha_documento">Fecha del Documento</label>
+                    <input id="fecha_documento" name="fecha_documento" type="date" class="form-control" value="{{ request.form['fecha_documento'] }}">
+                </div>
+                </div>
+                <div class="row">
+                <div class="col">
+                    <label for="contacto">Nombre del Contacto</label>
+                    <textarea id="contacto" name="contacto" class="form-control" value="{{ request.form['contacto'] }}" placeholder="Nombre del Contacto"></textarea>
+                </div>
+                <div class="col">
+                    <label for="correo_contacto">Correo del Contacto</label>
+                    <textarea id="correo_contacto" name="correo_contacto" class="form-control" value="{{ request.form['correo_contacto'] }}" placeholder="Correo del Contacto"></textarea>
+                </div>
+                </div>
+                <div class="row">
+                <div class="col">
+                    <label for="telefono_contacto">Telefono del Contacto</label>
+                    <textarea id="telefono_contacto" name="telefono_contacto" class="form-control" value="{{ request.form['telefono_contacto'] }}" placeholder="Telefono del Contacto"></textarea>
+                </div>
+                <div class="col">
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <a class="collapsed card-link link-secondary" data-bs-toggle="collapse" href="#collapseTwo">
+                    <h3><b>Datos de Gestión de Diseño</b></h3>
+                </a>
+            </div>
+            <div id="collapseTwo" class="collapse show" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <label for="ip_madre">IP Madre</label>
+                            <input id="ip_madre" name="ip_madre" class="form-control" value="{{ request.form['ip_madre'] }}" placeholder="IP Madre">
+                        </div>
+                        <div class="col">
+                            <label for="fecha_inicio_diseno">Fecha Inicio de Diseño</label>
+                            <input id="fecha_inicio_diseno" name="fecha_inicio_diseno" type="date" class="form-control" value="{{ request.form['fecha_inicio_diseno'] }}" placeholder="Fecha Inicio de Diseño">
+                        </div>
+                        <div class="col">
+                            <label for="fecha_termino_diseno">Fecha Termino de Diseño</label>
+                            <input id="fecha_termino_diseno" name="fecha_termino_diseno" type="date" class="form-control" value="{{ request.form['fecha_termino_diseno'] }}" placeholder="Fecha de Termino de Obras">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <a class="collapsed card-link link-secondary" data-bs-toggle="collapse" href="#collapseThree">
+                    <h3><b>Datos de Gestión de Presupuesto</b></h3>
+                </a>
+            </div>
+            <div id="collapseThree" class="collapse show" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <label for="fecha_entrega_ppto">Fecha de Entrega del Presupuesto</label>
+                            <input id="fecha_entrega_ppto" name="fecha_entrega_ppto" type="date" class="form-control" value="{{ request.form['fecha_entrega_ppto'] }}" placeholder="Fecha Entrega Presupuesto">
+                        </div>
+                        <div class="col">
+                            <label for="nro_ppto">Número de Presupuesto</label>
+                            <input id="nro_ppto" name="nro_ppto" class="form-control" value="{{ request.form['nro_ppto'] }}" placeholder="Número de Presupuesto">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="montoIGV">Monto + IGV</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">S/.</span>
+                                </div>
+                                <input id="montoIGV" name="montoIGV" class="form-control" type="number" step="0.01" min="0.00"
+                                    value="{{ request.form['montoIGV'] }}" placeholder="Monto IGV">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="prioridad">Prioridad/Grupo</label>
+                            <select id="prioridad" name="prioridad" class="form-select" value="{{ request.form['prioridad'] }}">
+                                <option>GESTION 2024</option>
+                                <option>GESTION 2023</option>
+                                <option>GRUPO 144</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <a class="collapsed card-link link-secondary" data-bs-toggle="collapse" href="#collapseFour">
+                    <h3><b>Datos de Gestión de Convenio y Factura</b></h3>
+                </a>
+            </div>
+            <div id="collapseFour" class="collapse show" data-parent="#accordion">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <label for="nro_convenio">Número de Convenio</label>
+                            <input id="nro_convenio" name="nro_convenio" class="form-control" value="{{ request.form['nro_convenio'] }}" placeholder="Número de Convenio">
+                        </div>
+                        <div class="col">
+                            <label for="fecha_firma_convenio">Fecha de Firma de Convenio</label>
+                            <input id="fecha_firma_convenio" name="fecha_firma_convenio" type="date" class="form-control" value="{{ request.form['fecha_firma_convenio'] }}" placeholder="Fecha de Firma de Convenio">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="plazo_convenio">Plazo del Convenio</label>
+                            <input id="plazo_convenio" name="plazo_convenio" class="form-control" value="{{ request.form['plazo_convenio'] }}" placeholder="Plazo del Convenio">
+                        </div>
+                        <div class="col">
+                            <label for="tiempo">Tiempo</label>
+                            <input id="tiempo" name="tiempo" class="form-control" value="{{ request.form['tiempo'] }}" placeholder="Tiempo">
+                        </div>
+                        <div class="col">
+                            <label for="fecha_caducidad">Fecha de Caducidad</label>
+                            <input id="fecha_caducidad" name="fecha_caducidad" type="date" class="form-control" value="{{ request.form['fecha_caducidad'] }}" placeholder="Fecha de Caducidad">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="numero_factura">Número de Factura</label>
+                            <input id="numero_factura" name="numero_factura" class="form-control" value="{{ request.form['numero_factura'] }}" placeholder="Número de Factura">
+                        </div>
+                        <div class="col">
+                            <label for="fecha_pago_96">Fecha Pago 96%</label>
+                            <input id="fecha_pago_96" name="fecha_pago_96" type="date" class="form-control" value="{{ request.form['fecha_pago_96'] }}" placeholder="Fecha Pago 96%">
+                        </div>
+                        <div class="col">
+                            <label for="fecha_pago_4">Fecha Pago 4%</label>
+                            <input id="fecha_pago_4" name="fecha_pago_4" type="date" class="form-control" value="{{ request.form['fecha_pago_4'] }}" placeholder="Fecha Pago 4%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                
+
+        <br>
+        <input class="btn btn-primary" type="submit" value="Guardar">
+  </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  
+</script>
+{% endblock %}

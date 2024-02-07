@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Registrar nueva solicitud de Inf. de Red{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data" name="form1">
+    <div class="row">
+      <label>
+        Código Unico: <input id="id" name="id" class="notbold" id="copyme" type="text" disabled="disabled" value="{{ request.form['id'] or id }}" required>
+        <input type="checkbox" name="others" onclick="enable_text(this.checked)" class="medium">
+        <button style="margin-bottom: 4px;"class="btn btn-secondary btn-sm" onClick="clip_div()">Copiar CU</button>
+      </label>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label for="link">Link de Archivos*</label>
+        <input id="link" name="link" class="form-control" type="url" placeholder="Link de Archivos" required>{{ request.form['link'] }}</input>
+      </div>
+    </div>
+
+    <div id="accordion">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between">
+          <a class="collapsed card-link" data-bs-toggle="collapse" href="#collapseOne" >
+            <h3><b>Datos de la Solicitud de la Entidad</b></h3>
+          </a>
+        </div>
+        <div id="collapseOne" class="collapse show" data-parent="#accordion">
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <label for="documento">Documento*</label>
+                <input id="documento" name="documento" class="form-control" value="{{ request.form['documento'] }}" placeholder="Documento" required>
+              </div>
+              <div class="col">
+                <label for="fecha_documento">Fecha del Documento</label>
+                <input id="fecha_documento" name="fecha_documento" type="date" class="form-control" value="{{ request.form['fecha_documento'] }}">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="titulo_correo">Título del Correo</label>
+                <input id="titulo_correo" name="titulo_correo" class="form-control" value="{{ request.form['titulo_correo'] }}" placeholder="Título del Correo">
+              </div>
+              <div class="col">
+                <label for="fecha_correo">Fecha del Correo</label>
+                <input id="fecha_correo" name="fecha_correo" type="date" class="form-control" value="{{ request.form['fecha_correo'] }}">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="nombre_entidad">Nombre de la Entidad*</label>
+                <input id="nombre_entidad" name="nombre_entidad" class="form-control" value="{{ request.form['nombre_entidad'] }}" placeholder="Nombre de la Entidad" required>
+              </div>
+              <div class="col">
+                <label for="entidad">Grupo Entidad*</label>
+                <select id="entidad" name="entidad" class="form-select" value="{{ request.form['entidad'] }}" placeholder="Grupo Entidad" required>
+                  <option disabled selected value> -- Elige una opción -- </option>
+                  <option>ATU</option>
+                  <option>AUTORIDAD PARA LA RECONSTRUCCIÓN CON CAMBIOS</option>
+                  <option>CONSORCIOS PRIVADOS</option>
+                  <option>DESPLIEGUE TDP</option>
+                  <option>EBC</option>
+                  <option>EMAPE</option>
+                  <option>INVERMET</option>
+                  <option>GOBIERNOS REGIONALES</option>
+                  <option>LUZ DEL SUR</option>
+                  <option>MTC</option>
+                  <option>MTC - PROVIAS</option>
+                  <option>MUNICIPALIDADES</option>
+                  <option>SEDACUSCO</option>
+                  <option>SEDAPAL</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="proyecto">Proyecto*</label>
+                <textarea id="proyecto" name="proyecto" class="form-control" value="{{ request.form['proyecto'] }}" placeholder="Proyecto" required></textarea>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="departamento">Departamento*</label>
+                <select id="departamento" name="departamento" class="form-select" value="{{ request.form['departamento'] }}" 
+                        placeholder="Departamento" hx-trigger="change, load" hx-get="/provincia" hx-target="#provincia" required>
+                  <option disabled selected value> -- Elige una opción -- </option>
+                  {% for departamento in departamentos %}
+                    <option>{{ departamento['departamento'] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col">
+                <label for="provincia">Provincia*</label>
+                <select id="provincia" name="provincia" class="form-select" value="{{ request.form['provincia'] }}" 
+                        placeholder="Provincia" hx-trigger="change, load" hx-get="/distrito" hx-target="#distrito" required>
+                </select>
+              </div>
+              <div class="col">
+                <label for="distrito">Distrito*</label>
+                <select id="distrito" name="distrito" class="form-select" value="{{ request.form['distrito'] }}" placeholder="Distrito" required>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="contacto">Nombre del Contacto</label>
+                <textarea id="contacto" name="contacto" class="form-control" value="{{ request.form['contacto'] }}" placeholder="Nombre del Contacto"></textarea>
+              </div>
+              <div class="col">
+                <label for="correo_contacto">Correo del Contacto</label>
+                <textarea id="correo_contacto" name="correo_contacto" class="form-control" value="{{ request.form['correo_contacto'] }}" placeholder="Correo del Contacto"></textarea>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="telefono_contacto">Telefono del Contacto</label>
+                <textarea id="telefono_contacto" name="telefono_contacto" class="form-control" value="{{ request.form['telefono_contacto'] }}" placeholder="Telefono del Contacto"></textarea>
+              </div>
+              <div class="col">
+                <label for="archivoKML">Cargar Archivo KML (zona del proyecto)</label>
+                <input id="archivoKML" name="archivoKML" type="file" class="custom-file-input" >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <a class="collapsed card-link" data-bs-toggle="collapse" href="#collapseTwo">
+            <h3><b>Datos de Gestión</b></h3>
+          </a>
+        </div>
+        <div id="collapseTwo" class="collapse show" data-parent="#accordion">
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <label for="resumen_planta">Resumen Planta Red (SI/NO)</label>
+                <select id="resumen_planta" name="resumen_planta" class="form-select" value="{{ request.form['resumen_planta'] }}">
+                  <option>-</option>
+                  <option>SI</option>
+                  <option>NO</option>
+                </select>
+              </div>
+              <div class="col">
+                <label for="fecha_respuesta">Fecha de Respuesta</label>
+                <input id="fecha_respuesta" name="fecha_respuesta" type="date" class="form-control" value="{{ request.form['fecha_respuesta'] }}">
+              </div>
+              <div class="col">
+                <label for="tma">TMA</label>
+                <input id="tma" name="tma" type="number" class="form-control" value="{{ request.form['tma'] }}">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="estado_inf_red">Estado de Información de Red</label>
+                <select id="estado_inf_red" name="estado_inf_red" class="form-select" value="{{ request.form['estado_inf_red'] }}">
+                  <option>PENDIENTE</option>
+                  <option>EN PROCESO</option>
+                  <option>ATENDIDO</option>
+                  <option>CANCELADO</option>
+                </select>
+              </div>
+              <div class="col">
+                <label for="estado_proyecto">Estado del Proyecto</label>
+                <select id="estado_proyecto" name="estado_proyecto" class="form-select" value="{{ request.form['estado_proyecto'] }}">
+                  <option>-</option>
+                  <option>EN PROYECTO</option>
+                  <option>EN EJECUCION</option>
+                  <option>ANTEPROYECTO</option>
+                  <option>EN ESTUDIO</option>
+                </select>
+              </div>
+              <div class="col">
+                <label for="peso_kml">CAPACIDAD INFO RED kml</label>
+                <input id="peso_kml" name="peso_kml" class="form-control" value="{{ request.form['peso_kml'] }}">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="formulario_completado">Formulario Remitido Completado</label>
+                <select id="formulario_completado" name="formulario_completado" class="form-select" value="{{ request.form['formulario_completado'] }}">
+                  <option>NO</option>
+                  <option>REMITIDO</option>
+                  <option>COMPLETADO</option>
+                </select>
+              </div>
+              <div class="col">
+                <label for="inicio_obras">Fecha de Inicio de Obras</label>
+                <input id="inicio_obras" name="inicio_obras" class="form-control" value="{{ request.form['inicio_obras'] }}" placeholder="Fecha de Inicio de Obras">
+              </div>
+              <div class="col">
+                <label for="complejidad">Complejidad</label>
+                <input id="complejidad" name="complejidad" class="form-control" value="{{ request.form['complejidad'] }}" placeholder="Complejidad">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <br>
+    <input class="btn btn-primary" type="submit" value="Guardar">
+  </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function clip_div() {
+    // Get the text field
+    var copyText = document.getElementById("id");
+    // Select the text field
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+
+    // Copy the text inside the text field
+    console.log(copyText.value);
+    copyToClipboard(copyText.value);
+
+    // Alert the copied text
+    alert("Código Único copiado: " + copyText.value);
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard) {
+      return navigator.clipboard.writeText(text);
+    }
+
+    const element = document.createElement('span');
+    element.textContent = text;
+    element.style.whiteSpace = 'pre';
+    document.body.appendChild(element);
+    const selection = window.getSelection();
+    const range = document.createRange();
+    selection.removeAllRanges();
+    range.selectNode(element);
+    selection.addRange(range);
+    document.execCommand('copy');
+    selection.removeAllRanges();
+    document.body.removeChild(element);
+  }
+
+  function enable_text(status) {
+    status = (status) ? false : true; //convert status boolean to text 'disabled'
+    document.form1.id.disabled = status;
+  }
+
+</script>
+{% endblock %}

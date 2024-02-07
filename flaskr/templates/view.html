@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2><b>{% block title %}Código Único: {{ inf_red['id'] }} {% endblock %} </b></h2>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style_progress_bar.css') }}">
+{% endblock %}
+
+{% block content %}
+  
+    
+    {% for n in range(num_estados) %}
+      <div id="accordion">
+      <div class="card">
+        <div class="card-header">
+          {% if presupuestos[n] %}
+          <a class="collapsed card-link link-dark" data-bs-toggle="collapse" href="{{ '#' ~ presupuestos[n]['id'] ~ presupuestos[n]['ip_madre'] }}" style="text-decoration:none; ">
+          {% else %}
+          <a class="collapsed card-link link-dark" data-bs-toggle="collapse" href="#infred_accordeon" style="text-decoration:none; "></a>
+          {% endif %}
+            <h6 style="padding-left: 30px;margin-bottom: 0;"><b>Estado:</b> {{ estado_general[n] | safe }}</h6>
+            {% if presupuestos[n] %}
+            <a style="display: flex;">
+              <h6 style="padding-left: 30px;margin-bottom: 0;"><b>IP Madre:</b> {{ presupuestos[n]['ip_madre'] }}</h6>
+              <h6 style="padding-left: 30px;margin-bottom: 0;"><b>Bautizo:</b> {{ presupuestos[n]['bautizo'] }}</h6>
+            </a>
+            {% endif %}
+
+          </a>
+        </div>
+        {% if presupuestos[n] %}
+          {% if n == 0 %}
+            <div id="{{ presupuestos[n]['id'] ~ presupuestos[n]['ip_madre'] }}" class="collapse show" data-parent="#accordion">
+          {% else %}
+            <div id="{{ presupuestos[n]['id'] ~ presupuestos[n]['ip_madre'] }}" class="collapse" data-parent="#accordion">
+          {% endif %}
+        {% else %}
+          <div id="infred_accordeon" class="collapse show" data-parent="#accordion">
+        {% endif %}
+          <div class="card-body">
+            <div class="scroll">
+            <ul class="step-wizard-list">
+              <li class="{{ list_class[n][0][1] }}">
+                <span class="progress-count">1</span>
+                <span class="progress-label">{{ list_class[n][0][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][1][1] }}">
+                <span class="progress-count">2</span>
+                <span class="progress-label">{{ list_class[n][1][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][2][1] }}">
+                <span class="progress-count">3</span>
+                <span class="progress-label">{{ list_class[n][2][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][3][1] }}">
+                <span class="progress-count">4</span>
+                <span class="progress-label">{{ list_class[n][3][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][4][1] }}">
+                <span class="progress-count">5</span>
+                <span class="progress-label">{{ list_class[n][4][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][5][1] }}">
+                <span class="progress-count">6</span>
+                <span class="progress-label">{{ list_class[n][5][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][6][1] }}">
+                <span class="progress-count">7</span>
+                <span class="progress-label">{{ list_class[n][6][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][7][1] }}">
+                <span class="progress-count">8</span>
+                <span class="progress-label">{{ list_class[n][7][0] | safe }}</span>
+              </li>
+              <li class="{{ list_class[n][8][1] }}">
+                <span class="progress-count">9</span>
+                <span class="progress-label">{{ list_class[n][8][0] | safe }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      </div> 
+      </div> 
+    {% endfor %}
+          
+      
+  <br>
+    
+  
+  
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-4 mb-5 mb-lg-0 wow fadeIn">
+      <div class="card border-0 shadow">
+        {{ iframe|safe }}
+        <div class="card-body p-1-9 p-xl-5">
+          <div class="mb-4">
+            <h3 class="h4 mb-0">{{ inf_red['entidad'] }}</h3>
+            <span class="text-primary">{{ inf_red['nombre_entidad'] }}</span>
+          </div>
+          <ul class="list-unstyled mb-4">
+            <li>{{ inf_red['departamento'] }}</li>
+            <li>{{ inf_red['provincia'] }}</li>
+            <li>{{ inf_red['distrito'] }}</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Aca tabla de historial -->
+      <div id="accordion">
+      {% for historial in list_historial %}
+        
+          <div class="card">
+            <div class="card-header">
+              <a class="collapsed card-link" data-bs-toggle="collapse" href="{{ '#' ~ historial[2] }}" style="text-decoration:none; color:black; font-size: 12px;">
+                <b>{{ historial[1] | safe }}</b>
+              </a>
+            </div>
+            <div id="{{ historial[2] }}" class="collapse" data-parent="#accordion">
+              <div class="card-body" style="padding: 0px;">
+                <table class="table table-bordered table-sm table-hover">
+                  <thead>
+                    <tr class="table-primary" style="font-size: 0.90em;">
+                      <th>Fecha</th>
+                      <th>Usuario</th>
+                      <th>IP Madre</th>
+                      <th>Comentario</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in historial[0] %}
+                      <tr>
+                        <td style="white-space: nowrap; font-size: 12px;">{{ row['fecha'].strftime('%d/%m/%Y') }}</td>
+                        <td style="white-space: nowrap; font-size: 12px;">{{ row['username'] }}</td>
+                        <td style="white-space: nowrap; font-size: 12px;">{{ row['ip_madre'] }}</td>
+                        <td style="white-space: pre-line; text-align: left; font-size: 12px;">{{ row['observacion'] | safe }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        
+      {% endfor %}
+      </div>
+
+    </div>
+    <div class="col-lg-8">
+      <div class="ps-lg-1-6 ps-xl-5">
+        <div class="mb-5 wow fadeIn">
+          <div class="text-start mb-1-6 wow fadeIn">
+            <h2 class="h1 mb-0 text-primary">Proyecto</h2>
+          </div>
+          <p>{{ inf_red['proyecto'] }}</p>
+          <br>
+
+          <div id="accordion">
+
+            <div class="card">
+              <div class="card-header d-flex justify-content-between">
+                <a class="collapsed card-link" data-bs-toggle="collapse" href="#collapseOne">
+                  <h3><b>Información de Red</b></h3>
+                  <a style="padding-top: 7px;" class="action" href="{{ url_for('inf_red.updateInfRed', id=inf_red['id']) }}" title="Editar">
+                    <i class="fa-solid fa-pen-to-square fa-2xl"></i>
+                  </a>
+                </a>
+              </div>
+              <div id="collapseOne" class="collapse" data-parent="#accordion">
+                <div class="card-body">
+                  <p><b>Documento: </b>{{ inf_red['documento'] }}</p>
+                  <p><b>Fecha de Documento: </b>{{ inf_red['fecha_documento'].strftime('%d/%m/%Y') if inf_red['fecha_documento'] else None }}</p>
+                  <hr>
+                  <p><b>Título del Correo: </b>{{ inf_red['titulo_correo'] }}</p>
+                  <p><b>Fecha del Correo: </b>{{ inf_red['fecha_correo'].strftime('%d/%m/%Y') if inf_red['fecha_correo'] else 'Sin dato' }}</p>
+                  <hr>
+                  <table class="table">
+                    <tr>
+                      <td style="text-align: left;"><b>Contacto:</b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['contacto'] }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>Correo:</b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['correo_contacto'] }}</td>
+                    </tr>
+                    <tr class="last">
+                      <td style="text-align: left;"><b>Telf.:</b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['telefono_contacto'] }}</td>
+                    </tr>
+                  </table>
+                  <hr>
+                  <table class="table">
+                    <tr>
+                      <td style="text-align: left;"><b>Resumen Planta Red (SI/NO): </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['resumen_planta'] }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>Fecha de Respuesta: </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['fecha_respuesta'].strftime('%d/%m/%Y') if inf_red['fecha_respuesta'] else 'Sin dato' }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>TMA: </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['tma'] }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>Estado en Red: </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['estado_inf_red'] }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>Estado del Proyecto: </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['estado_proyecto'] }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>Capacidad Info Red kml (KB): </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['peso_kml'] }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>Fecha de Inicio de Obras: </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['inicio_obras'] }}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: left;"><b>Complejidad: </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['complejidad'] }}</td>
+                    </tr>
+                    <tr class="last">
+                      <td style="text-align: left;"><b>Formulario Remitido Completado: </b></td>
+                      <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ inf_red['formulario_completado'] }}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <br>
+          {% for presupuesto in presupuestos %}
+            <div id="accordion">
+              <div class="card">
+                <div class="card-header">
+                  <a class="collapsed card-link link-dark" data-bs-toggle="collapse" href="{{ '#' ~ presupuesto['id'] }}" style="text-decoration:none">
+                    <b>IP Madre </b> {{ presupuesto['ip_madre'] if presupuesto['ip_madre'] != '' else 'En Proceso de Generar IP Madre' }} &emsp;
+                    <b>Bautizo </b> {{ presupuesto['bautizo'] }}
+                    <a style="float: right;" class="action" href="{{ url_for('presupuesto.updatePresupuesto', id=presupuesto['id']) }}" title="Editar">
+                      <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                    </a>
+                  </a>
+                </div>
+                <div id="{{ presupuesto['id'] }}" class="collapse" data-parent="#accordion">
+                  <div class="card-body">
+                    <b>Documento de Solicitud: </b>{{ presupuesto['documento'] }}
+                    <br>
+                    {% if presupuesto['fecha_documento'] %}
+                      <b>Fecha de Documento: </b>{{ presupuesto['fecha_documento'].strftime('%d/%m/%Y') }}
+                    {% else %}
+                      <b>Fecha de Documento: </b>Sin Fecha Cargada
+                    {% endif %}
+                    <hr>
+                    <table class="table">
+                      <tr>
+                        <td style="text-align: left;"><b>Contacto:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['contacto'] }}</td>
+                      </tr>
+                      <tr>
+                        <td style="text-align: left;"><b>Correo:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['correo_contacto'] }}</td>
+                      </tr>
+                      <tr class="last">
+                        <td style="text-align: left;"><b>Telf.:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['telefono_contacto'] }}</td>
+                      </tr>
+                    </table>
+                    <hr>
+                    <table class="table">
+                      <tr>
+                        <td style="text-align: left;"><b>Estado:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['estado'] }}</td>
+                      </tr>
+                      <tr>
+                        <td style="text-align: left;"><b>Mes de Pago Interno:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['mes_pago_planificado'] }}</td>
+                        <td style="text-align: left;"><b>Semana de Pago Interno:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['semana_pago_interno'] if presupuesto['semana_pago_interno'] else 'Sin dato' }}</td>
+                      </tr>
+                      <tr>
+                        <td style="text-align: left;"><b>Mes de Pago Oficial:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['mes_pago_oficial'] }}</td>
+                        <td style="text-align: left;"><b>Semana de Pago Oficial:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['semana_pago_oficial'] if presupuesto['semana_pago_oficial'] else 'Sin dato' }}</td>
+                      </tr>
+                      <tr class="last">
+                        <td style="text-align: left;"><b>Prioridad.:</b></td>
+                        <td style="text-align: left; padding-left: 10px; white-space:pre;">{{ presupuesto['prioridad'] }}</td>
+                      </tr>
+                    </table>
+                    <hr>
+                    <div id="accordion">
+                      <div class="card">
+                        <div class="card-header">
+                          <a class="collapsed card-link" data-bs-toggle="collapse" href="{{ '#' ~ presupuesto['id'] ~ 'A' }}" style="text-decoration:none; color:#9B870D">
+                            <b>Gestión de Diseño</b>
+                          </a>
+                        </div>
+                        <div id="{{ presupuesto['id'] ~ 'A' }}" class="collapse" data-parent="#accordion">
+                          <div class="card-body">
+                            <table class="table">
+                              <tr>
+                                <td style="text-align: left;"><b>Fecha de Creación IP Madre:</b></td>
+                                <td style="text-align: left;">
+                                  {% if presupuesto['fecha_creacion_ipmadre'] %}
+                                    {{ presupuesto['fecha_creacion_ipmadre'].strftime('%d/%m/%Y') }}
+                                  {% else %}
+                                    Sin Fecha Cargada
+                                  {% endif %}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="text-align: left;"><b>Estado IP Madre WebPO:</b></td>
+                                <td style="text-align: left;">{{ presupuesto['estado_ipmadre_webPO'] }}</td>
+                              </tr>
+                              <tr>
+                                <td style="text-align: left;"><b>Empresa Colaboradora:</b></td>
+                                <td style="text-align: left;">{{ presupuesto['eecc'] }}</td>
+                              </tr>
+                              <tr>
+                                <td style="text-align: left;"><b>Solicitud OC:</b></td>
+                                <td style="text-align: left;">{{ presupuesto['estado_ipmadre_webPO'] }}</td>
+                              </tr>
+                              <tr>
+                                <td style="text-align: left;"><b>Fecha de Inicio de Diseño:</b></td>
+                                <td style="text-align: left;">
+                                  {% if presupuesto['fecha_inicio_diseno'] %}
+                                    {{ presupuesto['fecha_inicio_diseno'].strftime('%d/%m/%Y') }}
+                                  {% else %}
+                                    Sin Fecha Cargada
+                                  {% endif %}
+                                </td>
+                              </tr>
+                              <tr class="last">
+                                <td style="text-align: left;"><b>Fecha de Termino de Diseño:</b></td>
+                                <td style="text-align: left;">
+                                  {% if presupuesto['fecha_termino_diseno'] %}
+                                    {{ presupuesto['fecha_termino_diseno'].strftime('%d/%m/%Y') }}
+                                  {% else %}
+                                    Sin Fecha Cargada
+                                  {% endif %}
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="card">
+                      <div class="card-header">
+                        <a class="collapsed card-link" data-bs-toggle="collapse" href="{{ '#' ~ presupuesto['id'] ~ 'B' }}" style="text-decoration:none; color:#7851A9;">
+                          <b>Gestión de Presupuesto</b>
+                        </a>
+                      </div>
+                      <div id="{{ presupuesto['id'] ~ 'B' }}" class="collapse" data-parent="#accordion">
+                        <div class="card-body">
+                          <table class="table">
+                            <tr>
+                              <td style="text-align: left;"><b>Fecha de Entrega de Presupuesto:</b></td>
+                                <td style="text-align: left;">
+                                  {% if presupuesto['fecha_entrega_ppto'] %}
+                                    {{ presupuesto['fecha_entrega_ppto'].strftime('%d/%m/%Y') }}
+                                  {% else %}
+                                    Sin Fecha Cargada
+                                  {% endif %}
+                                </td>
+                                <tr>
+                                  <td style="text-align: left;"><b>Número de Presupuesto:</b></td>
+                                  <td style="text-align: left;">{{ presupuesto['nro_ppto'] }}</td>
+                                </tr>
+                                <tr>
+                                  <td style="text-align: left;"><b>Monto Con IGV:</b></td>
+                                  <td style="text-align: left;">{{ 'S/. {:,.2f}'.format(presupuesto['montoIGV']) if presupuesto['montoIGV'] else None }}</td>
+                                </tr>
+                                <tr class="last">
+                                  <td style="text-align: left;"><b>Monto Sin IGV:</b></td>
+                                  <td style="text-align: left;">{{ 'S/. {:,.2f}'.format(presupuesto['montoIGV']/1.18) if presupuesto['montoIGV'] else None  }}</td>
+                                </tr>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card">
+                      <div class="card-header">
+                        <a class="collapsed card-link" data-bs-toggle="collapse" href="{{ '#' ~ presupuesto['id'] ~ 'C' }}" style="text-decoration:none; color:#006400">
+                          <b>Gestión de Convenio y Pago</b>
+                        </a>
+                      </div>
+                      <div id="{{ presupuesto['id'] ~ 'C' }}" class="collapse" data-parent="#accordion">
+                        <div class="card-body">
+                          <table class="table">
+                            <tr>
+                              <td style="text-align: left;"><b>Nro. de Convenio:</b></td>
+                              <td style="text-align: left;">{{ presupuesto['nro_convenio'] if presupuesto['nro_convenio'] else 'Sin Dato' }}</td>
+                              <td style="text-align: left;"><b>Fecha Firma:</b></td>
+                                <td style="text-align: left;">{{ presupuesto['fecha_firma_convenio'].strftime('%d/%m/%Y') if presupuesto['fecha_firma_convenio'] else 'Sin dato' }}</td>
+                            </tr>
+                            <tr>
+                              <td style="text-align: left;"><b>Plazo del Convenio:</b></td>
+                              <td style="text-align: left;">{{ presupuesto['plazo_convenio'] if presupuesto['plazo_convenio'] else 'Sin Dato' }}</td>
+                              <td style="text-align: left;"><b>Tiempo:</b></td>
+                              <td style="text-align: left;">{{ presupuesto['tiempo'] if presupuesto['tiempo'] else 'Sin Dato' }}</td>
+                              <td style="text-align: left;"><b>Fecha de Caducidad:</b></td>
+                              <td style="text-align: left;">{{ presupuesto['fecha_caducidad'].strftime('%d/%m/%Y') if presupuesto['fecha_caducidad'] else 'Sin dato' }}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left;"><b>Nro. de Factura:</b></td>
+                                <td style="text-align: left;">{{ presupuesto['numero_factura'] if presupuesto['numero_factura'] else 'Sin Dato' }}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left;"><b>Monto 96%:</b></td>
+                                <td style="text-align: left;">{{ 'S/. {:,.2f}'.format(presupuesto['montoIGV']*0.96) if presupuesto['montoIGV'] else None }}</td>
+                                <td style="text-align: left;"><b>Fecha Pago 96%:</b></td>
+                                <td style="text-align: left;">{{ presupuesto['fecha_pago_96'].strftime('%d/%m/%Y') if presupuesto['fecha_pago_96'] else 'Sin dato' }}</td>
+                            </tr>
+                            <tr class="last">
+                                <td style="text-align: left;"><b>Monto 4%:</b></td>
+                                <td style="text-align: left;">{{ 'S/. {:,.2f}'.format(presupuesto['montoIGV']*0.04) if presupuesto['montoIGV'] else None  }}</td>
+                                <td style="text-align: left;"><b>Fecha Pago 4%:</b></td>
+                                <td style="text-align: left;">{{ presupuesto['fecha_pago_4'].strftime('%d/%m/%Y') if presupuesto['fecha_pago_4'] else 'Sin dato' }}</td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  </div>
+                </div>
+              
+            </div>
+          {% endfor %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

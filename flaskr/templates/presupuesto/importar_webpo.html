@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Importar Datos de Web PO{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <style>
+    .dataframe {
+      height: 150px;
+      line-height: 1em;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      width: 100%;
+      border: 1px solid;
+      text-align: center !important;
+    }
+  </style>
+  <br>
+  <form method="post" enctype="multipart/form-data" name="form1">
+    <div class="row">
+      <div class="col">
+        <label for="webPO_resumenIP">Cargar ITEMPLAN MADRE - RESUMEN (formato .csv)</label>
+        <br>
+        <input id="webPO_resumenIP" name="webPO_resumenIP" type="file" class="custom-file-input" >
+      </div>
+    </div>
+    <br>
+    {% if tables_resumenIP %}
+      {% for table in tables_resumenIP %}
+        {{ table | safe }}
+      {% endfor %}
+    {% endif %}
+    <br>
+    <input class="btn btn-primary" type="submit" value="Importar Datos">
+  </form>
+
+{% endblock %}
+

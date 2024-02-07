@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Información de Red{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  div.dataTables_length {
+    margin-right: 20em;
+  }
+
+  div.dtsp-title{
+    display: none;
+  }
+
+  .dtsp-searchPanes table {
+    display:table;
+  }
+
+  div.dtsp-panesContainer div.dtsp-searchPanes div.dtsp-searchPane {
+    margin-top: 0px !important;
+}
+
+</style>
+
+  <br>
+  <table id="inf_red_table" class="table table-bordered table-sm table-hover">
+    <thead>
+      <tr class="table-primary text-center align-middle" style="font-size: 0.90em;">
+        <th>Código Único</th>
+        <th>Año</th>
+        <th>Nombre Entidad</th>
+        <th>Entidad</th>
+        <th>Proyecto</th>
+        <th>Estado Inf. Red</th>
+        <th>En Gestión de<br>Presupuesto</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody style="border: 1px solid black;">
+      {% for i in range(n) %}
+        <tr>
+          <td style="white-space: nowrap;" class="cu">{{ inf_redes[i]['id'] }}</td>
+          <td style="white-space: nowrap;">{{ inf_redes[i]['id'][0:4] }}</td>
+          <td style="white-space: nowrap;"><div class="largediv200px">{{ inf_redes[i]['nombre_entidad'] }}</div></td>
+          <td style="white-space: nowrap;">{{ inf_redes[i]['entidad'] }}</td>
+          <td> <div class="largediv" style="font-size: small;"> {{ inf_redes[i]['proyecto'] }} </div> </td>
+          <td style="{{ style_cell_estadoRed[i] }}">
+            {{ inf_redes[i]['estado_inf_red'] }}
+          </td>
+          <td style="white-space: nowrap;">{{ 'SI' if inf_redes[i]['cant_ppto'] != 0 else 'NO' }}</td>
+          <td>
+            <a class="action" href="{{ url_for('inf_red.viewAll', id=inf_redes[i]['id']) }}" title="Ver"><i class="fa-solid fa-eye"></i></a>
+            <a class="action" href="{{ url_for('inf_red.updateInfRed', id=inf_redes[i]['id']) }}" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
+            <a class="action" href="{{ inf_redes[i]['link_archivos'] }}" title="Ver Archivos" target="_blank"><i class="fa-solid fa-file"></i></a>
+            <a class="action comentario" title="Agregar Comentario" id="comentario"><i class="fa-solid fa-message"></i></a>
+            <br>
+            <a class="action" href="{{ url_for('presupuesto.createPresupuesto', cu=inf_redes[i]['id']) }}" title="Generar Solicitud Presupuesto">
+              <i class="fa-solid fa-money-check-dollar" style="color: #9562bd;"></i>
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+
+
+<link href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/searchpanes/2.2.0/css/searchPanes.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css" rel="stylesheet">
+ 
+  <script>
+    $(document).ready(function () {
+
+      $('.comentario').click(function(){
+        var $row = $(this).closest("tr");    // Find the row
+        var $cu = $row.find(".cu").text(); // Find the text
+        let comment = prompt("Comentario: ", "");
+        if (comment != null && comment != "") {
+          location.replace('/comentario/'+ $cu +'/'+ comment);
+          alert("Comentario Registrado");
+          //document.getElementById("demo").innerHTML = comment;
+        } else {
+          alert("Comentario Cancelado");
+        }
+      });
+
+      let table = $('#inf_red_table').DataTable({
+        /*searchPanes:{layout: 'columns-2'},*/
+        columnDefs: [
+            {className: "dt-head-center", targets: "_all"},
+            {     
+              searchPanes: {
+                  show: true,
+                  dtOpts: {scrollY: '100px'}
+              },
+              targets: [1,3,5]
+              },
+              {
+              searchPanes: {
+                  show: false
+              },
+              targets: [2,4,6]
+            }
+        ],
+        dom: 'PlBfrtip',
+        buttons: ['excel'],
+        iDisplayLength: 25,
+        orderCellsTop: true,
+        fixedHeader: true,
+        columns: [
+          {data: 'id', orderable: true, searchable: true},
+          {data: 'Año', orderable: true, searchable: true},
+          {data: 'Nombre Entidad', orderable: false, searchable: true},
+          {data: 'Entidad', orderable: false, searchable: true},
+          {data: 'Proyecto', orderable: false, searchable: true},
+          {data: 'estado_inf_red', orderable: false, searchable: true},
+          {data: 'gestion_ppto', orderable: false, searchable: false},
+          {orderable: false, searchable: false}],
+        language: [
+          {info: "Mostrando _START_ a _END_ de _TOTAL_ entradas" },
+        ]
+      });
+      new $.fn.dataTable.SearchPanes(table, {});
+      table.searchPanes.container().prependTo(table.table().container());
+      table.searchPanes.resizePanes();
+      
+    });
+
+  </script>
+{% endblock %}

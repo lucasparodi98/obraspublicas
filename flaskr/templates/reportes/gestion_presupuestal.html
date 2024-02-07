@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Gestion Presupuestal 2024 [FALTA IMPLEMENTAR]{% endblock %}</h1>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_objetivos.css') }}">
+{% endblock %}
+
+{% block content %}  
+            
+            <!--=============== TARJETAS ===================================================-->
+            
+                <div class="CD_cards">
+                    <div class="card_flex">
+                        <div>
+                            <div class="number">{{"{:,.1f}".format(certificado/1000000)}} MM</div>
+                            <div class="card-name">Certificado</div>
+                        </div>
+                        
+                        <i class="fas fa-check-circle icono"></i>
+                    </div>
+                    <div class="card_flex">
+                        <div>
+                            <div class="number">{{"{:,.1f}".format(en_certificacion/1000000)}} MM</div>
+                            <div class="card-name">En Certificación</div>
+                        </div> 
+                        
+                        <i class="fad fa-spinner icono"></i>
+                        
+                    </div>
+                    <div class="card_flex">
+                        <div>
+                            <div class="number">0.5 MM</div>
+                            <div class="card-name">OC Generadas</div>
+                        </div> 
+                        
+                        <i class="far fa-clipboard icono"></i>
+                        
+                    </div>
+                    
+                    <div class="card_flex" style="background-color: rgb(180,223,195)">
+                        <div>
+                            <div class="number">1.5 MM</div>
+                            <div class="card-name" style="color: #299b63;">Presupuesto Habilitado</div>
+                        </div>
+                        
+                        <i class="fas fa-hand-holding-usd icono"></i>
+                    </div>
+                    
+                </div>
+                
+                <div class="CD_charts">
+                    <div class="chart">
+                        <h2>Certificacion 2024</h2>
+                        <br>
+                        <canvas id="CD2"></canvas>
+                        <br>
+                        <div style="text-align:center; font-size:14px">Costo Promedio de Diseño 2.4 MM</div>
+                    </div>
+                    <div class="chart">
+                        <h2>OC Generadas 2024</h2>
+                        <br>
+                        <canvas id="OC_generadas" ></canvas>
+                        <br>
+                        <div style="text-align:center; font-size:14px">Total OC Generadas 1.5 MM</div>
+                    </div>
+                </div>
+                    
+                
+            <!--=============== GRAFICOS ===================================================-->
+            
+            <div class="fila3">
+                <div class="chart">
+                    <h2>Comprometido </h2>
+                    <br>
+                    <div class="panel-group" id="accordion">
+                        <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <h4 class="panel-title">
+                              <a data-toggle="collapse" href="#collapse1">En Certificación</a>
+                            </h4>
+                          </div>
+                          <div id="collapse1" class="panel-collapse collapse in">
+                              <div class="panel-body">
+                                  <table class="table table-bordered table-sm table-hover">
+                                  
+                                      <tr>
+                                      <th width="150px">DESCRIPCIÓN ENTIDAD</th>
+                                      <th>CÓDIGO UNICO</th>
+                                      <th>IP MADRE/IP</th>
+                                      <th>BAUTIZO</th>
+                                      <th>WEB PO</th>
+                                      <th width="120px">SOLICITUD OC</th>
+                                      <th width="20px">CANT PROY</th>
+                                      <th width="20px">DÍAS TRANSC.</th>
+                                      </tr>
+                                      
+                                      <th rowspan="7">MUNICIPALIDAD DE LIMA</th>
+                                      <tr>
+                                      <td>2023-800617</td>
+                                      <td>M-24-01-026</td>
+                                      <td>Jr. SEBASTIAN BARRANCA - LA VICTORIA LIMA </td>
+                                      <td>Registrado</td>
+                                      <td>SIN SOLICITUD DE OC</td>
+                                      <td>1</td>
+                                      <td>9</td>
+                                      </tr>
+                                      <tr>
+                                          <td>2023-874415</td>
+                                      <td>M-24-01-019</td>
+                                      <td>AA.HH LA RINCONADA - PAMPLONA ALTA -SJM - LIMA</td>
+                                      <td>Registrado</td>
+                                      <td>SIN SOLICITUD DE OC</td>
+                                      <td>1</td>
+                                      <td>9</td>
+                                      </tr>
+                                      <tr>
+                                          <td>2023-701718</td>
+                                      <td>M-24-01-020</td>
+                                      <td>AV. ISIDRO ALCIBAR -AV GRAU - TRAMO ENTRE AV ZARUMILLA Y AV CAQUETA -SMP - LIMA </td>
+                                      <td>Registrado</td>
+                                      <td>SIN SOLICITUD DE OC</td>
+                                      <td>1</td>
+                                      <td>9</td>
+                                      </tr>
+                                      <tr>
+                                          <td>2023-704170</td>
+                                      <td>M-24-01-021</td>
+                                      <td>JR. FRANCISCO JAVIER LUNA PIZARRO - LA VICTORIA.</td>
+                                      <td>Registrado</td>
+                                      <td>SIN SOLICITUD DE OC</td>
+                                      <td>1</td>
+                                      <td>9</td>
+                                      </tr>
+                                      <tr>
+                                          <td>2023-710077</td>
+                                      <td>M-24-01-022</td>
+                                      <td>AV. CRISTO BLANCO - SAN FRANCISO DE LA CRUZ - PAMPLONA ALTA - SJM</td>
+                                      <td>Registrado</td>
+                                      <td>SIN SOLICITUD DE OC</td>
+                                      <td>1</td>
+                                      <td>9</td>
+                                      </tr>
+                                      <tr>
+                                          <td>2023-714035</td>
+                                      <td>M-24-01-023</td>
+                                      <td>VIA DE INGRESO A PUCUSANA.</td>
+                                      <td>Registrado</td>
+                                      <td>SIN SOLICITUD DE OC</td>
+                                      <td>1</td>
+                                      <td>9</td>
+                                      </tr>
+                                      <tr>
+                                      <th>MTC-DIRECCIÓN DE DISPONIBILIDAD DE PREDIOS</td>
+                                      <td>2023-714035</td>
+                                      <td>M-24-01-018</td>
+                                      <td>EVITAMIENTO CHICLAYO(EV08) PROGRESIVA 779+900 PN.</td>
+                                      <td>Registrado</td>
+                                      <td>SIN SOLICITUD DE OC</td>
+                                      <td>1</td>
+                                      <td>9</td>
+                                      </tr>
+              
+                                      <tr>
+                                          <th>Consorcio Constructor M2 de Lima</td>
+                                          <td>2024-943682</td>
+                                          <td>M-24-01-024</td>
+                                          <td>REUBICACION DE POSTE EN E4-06 ESTACION QUILCA LINEA 2 METRO DE LIMA</td>
+                                          <td>Registrado</td>
+                                          <td>SIN SOLICITUD DE OC</td>
+                                          <td>1</td>
+                                          <td>9</td>
+                                      </tr>
+              
+                                          <tr>
+                                              <th>ANA RIOS CONSULTORES</td>
+                                              <td>2023-304382</td>
+                                              <td>M-24-01-025</td>
+                                              <td>PUENTES GARCIA RADA Y PLAYA NORTE - PUNTA HERMOSA -LIMA</td>
+                                              <td>Registrado</td>
+                                              <td>SIN SOLICITUD DE OC</td>
+                                              <td>1</td>
+                                              <td>9</td>
+                                          </tr>
+                                      
+              
+                                  </table>
+                              
+                              </div>
+                          </div>
+                        </div>
+                        
+                        <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <h4 class="panel-title">
+                              <a data-toggle="collapse" href="#collapse3">En Validación</a>
+                            </h4>
+                          </div>
+                          <div id="collapse3" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                              <table class="table table-bordered table-sm table-hover">
+                                  
+                                  <tr>
+                                  <th>CÓDIGO UNICO</th>
+                                  <th>EECC</th>
+                                  <th>DESCRIPCIÓN ENTIDAD</th>
+                                  <th>BAUTIZO</th>
+                                  <th>COSTO DE DISEÑO</th>
+                                  <th width="20px">CANT PROY</th>
+                                  <th width="20px">DÍAS TRANSC.</th>
+                                  </tr>
+                                  <tr>
+                                  <td>2023-907269</td>
+                                  <td>LITEYCA</td>
+                                  <td>PEDELTA INGENIERIA SAC,</td>
+                                  <td>PUENTE JORGE CHAVEZ -CHIMBOTE-ANCASH</td>
+                                  <td>S/27,431.22</td>
+                                  <td>1</td>
+                                  <td>2</td>
+                                  </tr>
+                                  <tr>
+                                  <td>2023-1678226273525</td>
+                                  <td>COMFICA</td>
+                                  <td>SEDAPAL</td>
+                                  <td>SEDAPAL - TRABAJOS EN EL CERRO EL AGUSTINO FRENTE 2</td>
+                                  <td>S/18,968.05</td>
+                                  <td>1</td>
+                                  <td>5</td>
+                                  </tr>
+                                  <tr>
+                                  <td>2023-881266</td>
+                                  <td>DOMINION</td>
+                                  <td>GOBIERNO REGIONAL DE TACNA</td>
+                                  <td>PRESUPUESTO ESTIMADO DE AV. MAGOLLO TACNA</td>
+                                  <td>S/13,228.62</td>
+                                  <td>1</td>
+                                  <td>7</td>
+                                  </tr>
+                                  <tr>
+                                      <td>2023-997813</td>
+                                      <td>COBRA</td>
+                                      <td>CONSORCIO CONSTRUCTOR CIUDAD BLANCA</td>
+                                      <td>CIUDAD DEL PESCADOR-PAITA</td>
+                                      <td>S/6,067.33</td>
+                                      <td>1</td>
+                                      <td>7</td>
+                                  </tr>
+                                  
+                                  
+          
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <h4 class="panel-title">
+                              <a data-toggle="collapse" href="#collapse4">Pendiente de Certificar</a>
+                            </h4>
+                          </div>
+                          <div id="collapse4" class="panel-collapse collapse in">
+                            <div class="panel-body">
+  
+                            </div>
+                          </div>
+                        </div>
+                        
+  
+                        <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <h4 class="panel-title">
+                              <a data-toggle="collapse" href="#collapse6">Con OC Creada</a>
+                            </h4>
+                          </div>
+                          <div id="collapse6" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                              <table class="table table-bordered table-sm table-hover">
+                          
+                                  <tr>
+                                   <th>ESTADO</th>
+                                   <th>CODIGO UNICO</th>
+                                   <th>IP MADRE</th>
+                                   <th>BAUTIZO</th>
+                                   <th width="20px">CANT. PROY</th>
+                                   <th width="30px">MONTO<br>(SIN I.G.V.)</th>
+                                  </tr>
+                                  <tr>
+                                  <th rowspan="4">Pagado Febrero 2024</th>
+                                  <td>2</td>
+                                  </tr>
+                                  <tr>
+                                      <td>1</td>
+                                      </tr>  
+                                      <tr>
+                                          <td>3</td>
+                                          </tr> 
+                                          <tr>
+                                              <td>4</td>
+                                              </tr>    
+                                      
+                                  <tr>
+                                   <th colspan="8">Pagado Febrero 2024 Total</th>
+                                  </tr>
+          
+                                  <tr>
+                                  <th rowspan="6">Pagado Marzo 2024</th>
+                                  </tr>
+                                  <tr>
+                                  <td>1</td>
+                                  </tr>
+                                  <tr>
+                                      <td>2</td>
+                                      </tr>
+                                      <tr>
+                                          <td>3</td>
+                                          </tr>
+                                          <tr>
+                                              <td>4</td>
+                                              </tr>
+                                              <tr>
+                                                  <td>5</td>
+                                                  </tr>
+                                                  
+                                   
+                                  
+                                  <tr>
+                                   <th colspan="8">Pagado Marzo 2024 Total</th>
+                                  </tr>
+                                  
+          
+  
+          
+                              </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+                
+             
+    {% endblock %}
+
+    {% block scripts %}     
+                
+
+    
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <script>
+        $( document ).ready(function() {
+        /*-----------Chart Vertical Bars Group,  OC Generadas---------------------------*/
+        var ctx2 = document.getElementById('OC_generadas').getContext('2d');
+        var myChart2 = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+
+                datasets: [{
+                    label: 'Proyeccion de pago',
+                    data: [0, 0.256, 5.4, 2.3,0.367,0,4.8,3.1,0.09],
+                    backgroundColor: ['rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)'],
+                    borderColor: ['rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)'],
+                    borderWidth: 1,
+                    order:2
+                }]
+
+            },
+            options: {
+                responsive: true,
+                
+                scaleShowVerticalLines: false,
+                scales:{
+                    
+                    x:{
+                        grid:{drawOnChartArea: false}
+                    }
+                },
+                plugins:{
+                    legend: {
+                        display: false
+                    },
+                    datalabels:{
+                        color:'grey',
+                        maintainAspectRatio: false,
+                        align: 'top',
+                        anchor: 'end',
+                        formatter: function(value, context) {
+                            if(value >0 && value <1){
+                                return value*1000 + ' K';
+                            }else if(value >0){
+                                return value + ' MM';
+                                
+                            }else{
+                                return '';
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+
+        /*-----------Chart Vertical Bars Group,  Certificacion Mensual---------------------------*/
+        var ctx2 = document.getElementById('CD2').getContext('2d');
+        var myChart2 = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+
+                datasets: [{
+                    label: 'Costo Original OC',
+                    data: [0, 0.256, 5.4, 2.3,0.367,0,4.8,3.1,0.09],
+                    backgroundColor: 'rgb(68,175,105,1)',
+                    borderColor: 'rgb(68,175,105,1)',
+                    borderWidth: 1,
+                    order:2
+                },
+                {
+                    label: 'Costo Diseño',
+                    data: [0, 3.3, 3.4, 4.3,1.3,3,7.6,5.2,3],
+                    backgroundColor: 'rgb(180,223,195,1)',
+                    borderColor: 'rgb(180,223,195,1)',
+                    borderWidth: 1,
+                    order:2
+                },
+                {
+                    label: 'Costo Promedio de Diseño',
+                    data: [0, 2, 4, 3,1,1.5,5,5.1],
+                    backgroundColor: 'rgb(9,68,39,1)',
+                    borderColor: 'rgb(9,68,39,1)',
+                    borderWidth: 1,
+                    order:2
+                }],
+
+                
+
+
+            },
+            options: {
+                responsive: true,
+                
+                scaleShowVerticalLines: false,
+                scales:{
+                    
+                    x:{
+                        grid:{drawOnChartArea: false}
+                    }
+                },
+                plugins:{
+                    datalabels:{
+                        color:'grey',
+                        maintainAspectRatio: false,
+                        align: 'top',
+                        anchor: 'end',
+                        formatter: function(value, context) {
+                            if(value >0 && value <1){
+                                return value*1000 + ' K';
+                            }else if(value >0){
+                                return value;
+                                
+                            }else{
+                                return '';
+                            }
+                            
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+     });
+
+        function theFunction() {
+          año = document.getElementById("año").innerHTML;
+          if (año == "2024") {
+            document.getElementById("año").textContent = "2023";
+          } else {
+            document.getElementById("año").textContent = "2024";
+          }
+        }
+    </script>
+
+{% endblock %}
