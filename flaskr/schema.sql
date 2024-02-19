@@ -99,7 +99,7 @@ CREATE TABLE historial (
     FOREIGN KEY (presupuesto_id) REFERENCES presupuesto (id)
 );*/
 /*
-CREATE TABLE c (
+CREATE TABLE estadosOP (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     estado VARCHAR(500),
     grupo_estado VARCHAR(500),
@@ -141,3 +141,24 @@ CREATE TABLE distritos (
 INSERT INTO user (id, username, password, user_type, email)
 VALUES (1, 'Admin', 'Admin', 'Admin', 'example@example.com')
 */
+
+/*
+CREATE TABLE info_webpo (
+    ip_madre TEXT PRIMARY KEY,
+    estado_ip TEXT ,
+    fecha_recepcion DATE ,
+    eecc TEXT ,
+    pep TEXT ,
+    situacion TEXT ,
+    tipo_solicitud TEXT ,
+    monto_actual DECIMAL ,
+    estado_solicitud_actual TEXT ,
+    solicitud_oc_actual DATE ,
+    validacion_oc_actual DATE ,
+    estado_firma TEXT ,
+    monto_diseño_final DECIMAL ,
+    monto_inicial DECIMAL ,
+    solicitud_oc_creacion DATE ,
+    validacion_oc_creacion DATE ,
+
+);*/

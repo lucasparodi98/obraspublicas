@@ -210,7 +210,7 @@ def viewAll():
             FROM inf_red i
             LEFT JOIN presupuesto p ON i.id = p.cod_unico
             LEFT JOIN estadosOP e ON p.estado = e.estado
-            WHERE SUBSTRING(i.id, 1, 4) IN (""" + ','.join([str("'" + str(x) + "'") for x in tuple(year_post)]) + """)
+            WHERE SUBSTR(i.id, 1, 4) IN (""" + ','.join([str("'" + str(x) + "'") for x in tuple(year_post)]) + """)
             AND i.departamento IN (""" + ','.join([str("'" + str(x) + "'") for x in tuple(departamento_post)]) + """)
             AND grupo IN (""" + ','.join([str("'" + str(x) + "'") for x in tuple(estado_post)]) + """)
             """
@@ -238,8 +238,8 @@ def viewAll():
 @bp.route('/reporte/objetivos')
 @login_required
 def objetivos():
-    locale.setlocale(locale.LC_TIME, '')
-    mes_actual = date.today().strftime('%B') 
+    locale.setlocale(locale.LC_TIME, 'es_PE.UTF-8')    
+    mes_actual = date.today().strftime('%B').capitalize()
     porcentaje_mes_actual = date.today().month/12*100
     trimestres = {'Enero': 'Primer Trimestre', 'Febrero': 'Primer Trimestre', 'Marzo': 'Primer Trimestre', 'Abril': 'Segundo Trimestre', 'Mayo':'Segundo Trimestre', 'Junio':'Segundo Trimestre', 'Julio':'Tercer Trimestre', 'Agosto':'Tercer Trimestre', 'Setiembre':'Tercer Trimestre', 'Octubre':'Cuarto Trimestre', 'Noviembre': 'Cuarto Trimestre', 'Diciembre':'Cuarto Trimestre'}
     trimestre_actual = trimestres[mes_actual]
@@ -251,7 +251,7 @@ def objetivos():
     proyeccion_pago = get_db().execute(
     """SELECT  SUM(montoIGV),  mes_pago_oficial
         FROM presupuesto
-        WHERE SUBSTRING(mes_pago_oficial, -1) IN ('4') """).fetchall()
+        WHERE SUBSTR(mes_pago_oficial, -1) IN ('4') """).fetchall()
     proyeccion_pago = round(proyeccion_pago[0][0]/1000000,1)
     sobrecumplimiento = round(10-proyeccion_pago,1)
 
@@ -260,11 +260,11 @@ def objetivos():
     """SELECT  p.montoIGV, p.ip_madre, p.mes_pago_oficial, p.semana_pago_oficial, p.bautizo, p.semana_pago_interno, p.mes_pago_planificado, i.entidad, p.estado, i.entidad, p.cod_unico
         FROM presupuesto p
         LEFT JOIN inf_red i ON p.cod_unico = i.id
-        WHERE SUBSTRING(mes_pago_oficial, -1) = '4'""").fetchall()
+        WHERE SUBSTR(mes_pago_oficial, -1) = '4'""").fetchall()
     meses_plan_pago = get_db().execute(
     """SELECT  mes_pago_oficial, count(*) AS cant, sum(montoIGV) as monto
         FROM presupuesto 
-        WHERE SUBSTRING(mes_pago_oficial, -1) = '4'
+        WHERE SUBSTR(mes_pago_oficial, -1) = '4'
         GROUP BY mes_pago_oficial
         ORDER BY CASE mes_pago_oficial
             WHEN 'Febrero 2024' THEN 0
@@ -282,14 +282,14 @@ def objetivos():
     suma_plan_pago = get_db().execute(
     """SELECT  sum(montoIGV)
         FROM presupuesto p
-        WHERE SUBSTRING(mes_pago_oficial, -1) = '4'""").fetchall()
+        WHERE SUBSTR(mes_pago_oficial, -1) = '4'""").fetchall()
     
 
 
     plan_ofi = get_db().execute(
         """ SELECT  mes_pago_oficial,sum(montoIGV) 
             FROM  presupuesto
-            WHERE SUBSTRING(mes_pago_oficial, -1) IN ('4')
+            WHERE SUBSTR(mes_pago_oficial, -1) IN ('4')
             GROUP BY mes_pago_oficial   """ ).fetchall()
     #pago_meses[0][0]  devuelve valor de la primera fila de la columna mes_pago_oficial
     #pago_meses[0][1]  devuelve valor de la primera fila de la columna sum(montoIGV)
@@ -341,7 +341,7 @@ def objetivos():
     cronograma_mes_actual = get_db().execute(
         """ SELECT  semana_pago_oficial, bautizo_corto, montoIGV
             FROM  presupuesto
-            WHERE SUBSTRING(mes_pago_oficial, -1) = '4'  AND SUBSTRING(mes_pago_oficial, 0, INSTR(mes_pago_oficial, ' ')) = '""" + mes_actual + """' """
+            WHERE SUBSTR(mes_pago_oficial, -1) = '4'  AND SUBSTR(mes_pago_oficial, 0, INSTR(mes_pago_oficial, ' ')) = '""" + mes_actual + """' """
              ).fetchall()   
     semanas = {i['semana_pago_oficial'] for i in cronograma_mes_actual}
 
@@ -349,7 +349,7 @@ def objetivos():
     inf_pagado = get_db().execute(
         """SELECT  SUM(montoIGV),  estado
         FROM presupuesto
-        WHERE SUBSTRING(estado, -1) IN ('4') """ ).fetchall()
+        WHERE SUBSTR(estado, -1) IN ('4') """ ).fetchall()
     try:
         if inf_pagado[0][0]>1000000 or inf_pagado[0][0]==0:
             facturado = round(inf_pagado[0][0]/1000000,1)
@@ -362,7 +362,7 @@ def objetivos():
     inf_revision = get_db().execute(
         """SELECT  SUM(montoIGV),  mes_pago_oficial
         FROM presupuesto
-        WHERE SUBSTRING(mes_pago_oficial, 0, INSTR(mes_pago_oficial, ' ')) IN  ( """ + trim + """ ) """).fetchall()
+        WHERE SUBSTR(mes_pago_oficial, 0, INSTR(mes_pago_oficial, ' ')) IN  ( """ + trim + """ ) """).fetchall()
     try:
         if inf_revision[0][0]>1000000 or inf_pagado[0][0]==0:
             revision = round(inf_revision[0][0]/1000000,1)
@@ -375,11 +375,11 @@ def objetivos():
     avance = get_db().execute(
         """ SELECT  mes_pago_oficial,sum(montoIGV) 
             FROM  presupuesto
-            WHERE SUBSTRING(mes_pago_oficial, 0, INSTR(mes_pago_oficial, ' ')) = ' """ + mes_actual + """ ' """).fetchall()
+            WHERE SUBSTR(mes_pago_oficial, 0, INSTR(mes_pago_oficial, ' ')) = ' """ + mes_actual + """ ' """).fetchall()
 
 
 
-    return render_template('/reportes/objetivos.html', meses_plan_pago=meses_plan_pago, dias_cierre=dias_cierre, suma_plan_pago=suma_plan_pago, inf_plan_pago=inf_plan_pago, facturado=facturado, revision=revision, proyeccion_pago=proyeccion_pago, sobrecumplimiento=sobrecumplimiento,  pago_ofi_mens=pago_ofi_mens, pago_ofi_trim=pago_ofi_trim, pago_int_mens=pago_int_mens, pago_int_trim=pago_int_trim, ppto_emitido=ppto_emitido, cronograma_mes_actual=cronograma_mes_actual, mes_actual=mes_actual, semanas=semanas, avance=avance, porcentaje_mes_actual=porcentaje_mes_actual)
+    return render_template('/reportes/objetivos.html',  meses_plan_pago=meses_plan_pago, dias_cierre=dias_cierre, suma_plan_pago=suma_plan_pago, inf_plan_pago=inf_plan_pago, facturado=facturado, revision=revision, proyeccion_pago=proyeccion_pago, sobrecumplimiento=sobrecumplimiento,  pago_ofi_mens=pago_ofi_mens, pago_ofi_trim=pago_ofi_trim, pago_int_mens=pago_int_mens, pago_int_trim=pago_int_trim, ppto_emitido=ppto_emitido, cronograma_mes_actual=cronograma_mes_actual, mes_actual=mes_actual, semanas=semanas, avance=avance, porcentaje_mes_actual=porcentaje_mes_actual)
 
 @bp.route('/reporte/proyectos_gestionados_2024')
 @login_required
@@ -413,13 +413,13 @@ def proyectos_gestionados_2024():
     
     
     con_ip_sin_oc = get_db().execute(
-    """SELECT  i.nombre_entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado_ipmadre_webPO, p.solicitudOC, floor(julianday('now') - julianday(p.fecha_creacion_ipmadre)) AS dias_transc
+    """SELECT  i.nombre_entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado_ipmadre_webPO, p.solicitudOC, CAST((julianday('now') - julianday(p.fecha_creacion_ipmadre)) AS INTEGER) AS dias_transc
         FROM presupuesto p
         LEFT JOIN inf_red i ON p.cod_unico = i.id
         WHERE p.prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND p.estado = 'Diseño pendiente - IP MADRE sin orden de compra' """).fetchall()
     
     en_diseño = get_db().execute(
-    """SELECT  i.nombre_entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado_ipmadre_webPO, p.estado, floor(julianday('now') - julianday(p.fecha_inicio_diseno)) AS dias_transc
+    """SELECT  i.nombre_entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado_ipmadre_webPO, p.estado, CAST((julianday('now') - julianday(p.fecha_inicio_diseno)) AS INTEGER) AS dias_transc
         FROM presupuesto p
         LEFT JOIN inf_red i ON p.cod_unico = i.id
         WHERE p.prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND 
@@ -427,7 +427,7 @@ def proyectos_gestionados_2024():
             'Se modifica el alcance (En elab. De Nvo Diseño - Presupuesto)') """).fetchall()
     
     en_ppto = get_db().execute(
-    """SELECT  i.nombre_entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado, p.eecc, floor(julianday('now') - julianday(p.fecha_termino_diseno)) AS dias_transc
+    """SELECT  i.nombre_entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado, p.eecc, CAST((julianday('now') - julianday(p.fecha_termino_diseno)) AS INTEGER) AS dias_transc
         FROM presupuesto p
         LEFT JOIN inf_red i ON p.cod_unico = i.id
         WHERE p.prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND p.estado = 'Diseño Ejecutado, pdte Elab. Ppto' """).fetchall()
@@ -442,11 +442,11 @@ def proyectos_gestionados_2024():
 
        
     plan_oficial_interno = get_db().execute(
-        """SELECT  i.entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado, p.montoIGV, p.semana_pago_oficial, p.mes_pago_oficial, p.semana_pago_interno, p.mes_pago_planificado, floor(julianday('now') - julianday(p.fecha_entrega_ppto)) AS dias_transc
+        """SELECT  i.entidad, p.cod_unico, p.ip_madre, p.bautizo, p.estado, p.montoIGV, p.semana_pago_oficial, p.mes_pago_oficial, p.semana_pago_interno, p.mes_pago_planificado, CAST((julianday('now') - julianday(p.fecha_entrega_ppto)) AS INTEGER ) AS dias_transc
             FROM presupuesto p
             LEFT JOIN inf_red i ON p.cod_unico = i.id
             LEFT JOIN estadosOP e ON p.estado = e.estado
-            WHERE SUBSTRING(mes_pago_oficial, -1) IN ('4') 
+            WHERE SUBSTR(mes_pago_oficial, -1) IN ('4') 
             ORDER BY CASE p.mes_pago_oficial
                 WHEN 'Enero 2024 ' THEN 0
                 WHEN 'Febrero 2024' THEN 1
@@ -467,19 +467,19 @@ def proyectos_gestionados_2024():
         """SELECT  ip_madre
             FROM presupuesto p
             LEFT JOIN estadosOP e ON p.estado = e.estado
-            WHERE SUBSTRING(mes_pago_oficial, -1) NOT IN ('4') AND e.grupo_gestion ='EN COORDINACIÓN' AND p.prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND floor(julianday('now') - julianday(p.fecha_entrega_ppto))>=90""").fetchall()
+            WHERE SUBSTR(mes_pago_oficial, -1) NOT IN ('4') AND e.grupo_gestion ='EN COORDINACIÓN' AND p.prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND CAST((julianday('now') - julianday(p.fecha_entrega_ppto)) AS INTEGER)>=90""").fetchall()
     diseño_30_dias = get_db().execute(
         """SELECT  ip_madre
             FROM presupuesto 
-            WHERE estado ='En proceso de Diseño' AND prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND floor(julianday('now') - julianday(fecha_inicio_diseno))>30""").fetchall()
+            WHERE estado ='En proceso de Diseño' AND prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND CAST((julianday('now') - julianday(fecha_inicio_diseno)) AS INTEGER )>30""").fetchall()
     ppto_4_dias = get_db().execute(
         """SELECT  ip_madre
             FROM presupuesto 
-            WHERE estado ='Diseño Ejecutado, pdte Elab. Ppto' AND prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND floor(julianday('now') - julianday(fecha_termino_diseno))>4""").fetchall()
+            WHERE estado ='Diseño Ejecutado, pdte Elab. Ppto' AND prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND CAST((julianday('now') - julianday(fecha_termino_diseno)) AS INTEGER)>4""").fetchall()
     sin_oc_10_dias = get_db().execute(
         """SELECT  ip_madre
             FROM presupuesto 
-            WHERE estado ='Diseño pendiente - IP MADRE sin orden de compra' AND prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND floor(julianday('now') - julianday(fecha_creacion_ipmadre))>10""").fetchall()
+            WHERE estado ='Diseño pendiente - IP MADRE sin orden de compra' AND prioridad IN ('GESTION 2023', 'GESTION 2024', 'EBC') AND CAST((julianday('now') - julianday(fecha_creacion_ipmadre)) AS INTEGER)>10""").fetchall()
 
     importante={'sin_oc_10_dias':len(sin_oc_10_dias), 'diseño_30_dias':len(sin_oc_10_dias), 'ppto_4_dias':len(ppto_4_dias), 'sf_pago_3_meses':len(sf_pago_3_meses)}
     
@@ -496,19 +496,122 @@ def proyectos_gestionados_2024():
 @bp.route('/reporte/gestion_presupuestal')
 @login_required
 def gestion_presupuestal():
-    certificado = get_db().execute(
-        """ SELECT sum(montoIGV)
-        FROM presupuesto
-        WHERE estado_ipmadre_webPO = 'Certificado' AND (strftime('%Y', fecha_creacion_ipmadre) = '2023' OR SUBSTRING(ip_madre,3,2) = '23' ) """).fetchall()[0][0]
+    certificados = get_db().execute(
+        """ SELECT strftime('%m', validacion_oc_actual) AS 'mes', sum(monto_diseño_final) AS 'monto_final', sum(monto_inicial) AS 'monto_inicial' , avg(monto_diseño_final) AS 'monto_promedio', count(*) AS 'cant'
+        FROM info_webpo
+        WHERE estado_ip = 'Certificado' AND strftime('%Y', validacion_oc_actual) = '2024'
+        GROUP BY strftime('%m', validacion_oc_actual) """).fetchall()
+    
+    certificado_por_pep = get_db().execute(
+        """ SELECT SUBSTRING(pep,1,9) AS 'año_pep', sum(monto_diseño_final) AS 'monto_final', count(*) AS 'cant'
+        FROM info_webpo
+        WHERE estado_ip = 'Certificado' AND strftime('%Y', validacion_oc_actual) = '2024'
+        GROUP BY año_pep 
+        ORDER BY año_pep """).fetchall()
+    
     en_certificacion = get_db().execute(
-        """ SELECT sum(montoIGV)
-        FROM presupuesto
-        WHERE estado_ipmadre_webPO = 'En Certificacion' AND (strftime('%Y', fecha_creacion_ipmadre) = '2023' OR SUBSTRING(ip_madre,3,2) = '23' ) """).fetchall()[0][0]
+        """ SELECT sum(monto_diseño_final)
+        FROM info_webpo
+        WHERE estado_ip = 'En Certificación'  """).fetchall()[0][0]
+    
+    en_certificacion_detalle = get_db().execute(
+        """ SELECT w.ip_madre AS ip_madre, r.entidad, w.monto_diseño_final, w.monto_inicial, w.solicitud_oc_actual, p.bautizo
+        FROM info_webpo w
+        LEFT JOIN inf_red r ON w.ip_madre = r.id
+        LEFT JOIN presupuesto p ON w.ip_madre = p.ip_madre
+        WHERE estado_ip = 'En Certificación'  """).fetchall()
+
+    en_validacion_detalle = get_db().execute(
+        """ SELECT w.ip_madre AS ip_madre, w.eecc, w.monto_diseño_final, w.monto_inicial, w.solicitud_oc_actual, p.bautizo, IFNULL(REPLACE(w.estado_firma, 'ATENDIDO EECC', 'PEND FIRMA ALONSO'), 'PEND EECC') AS estado_firma
+        FROM info_webpo w
+        LEFT JOIN presupuesto p ON w.ip_madre = p.ip_madre
+        WHERE estado_ip = 'Terminado'  """).fetchall()
+
+    pend_certificar_detalle = get_db().execute(
+        """ SELECT w.ip_madre AS ip_madre, w.eecc, CAST (IFNULL(w.monto_diseño_final,0) AS INT) AS monto_diseño_final, w.monto_inicial, w.solicitud_oc_creacion , p.bautizo, w.estado_ip, p.estado
+        FROM info_webpo w
+        LEFT JOIN presupuesto p ON w.ip_madre = p.ip_madre
+        WHERE estado_ip IN ('Diseño', 'Diseño Ejecutado') AND w.ip_madre != 'M-24-01-026'  """).fetchall()
+
+    oc_creadas = get_db().execute(
+        """ SELECT sum(monto_actual)
+        FROM info_webpo
+        WHERE estado_ip IN ('Terminado', 'Diseño', 'Diseño Ejecutado') AND situacion = 'OC CREADA'  """).fetchall()[0][0]
+    
+    con_solicitud_oc = get_db().execute(
+        """ SELECT sum(w.monto_actual)
+        FROM info_webpo w
+        WHERE situacion IN ('SOLICITUD OC CREADA', 'SIN SOLICITUD OC') AND  strftime('%Y', solicitud_oc_creacion) = '2024' """).fetchall()[0][0]
+
+    con_solicitud_oc_detalle = get_db().execute(
+        """ SELECT w.monto_actual, w.ip_madre AS ip_madre,  w.solicitud_oc_creacion , p.bautizo, w.estado_ip
+        FROM info_webpo w
+        LEFT JOIN presupuesto p ON w.ip_madre = p.ip_madre
+        WHERE situacion IN ('SOLICITUD OC CREADA', 'SIN SOLICITUD OC') AND  strftime('%Y', solicitud_oc_creacion) = '2024' """).fetchall()
+
+    oc_generadas_por_estado = get_db().execute(
+        """ SELECT  estado_ip, strftime('%m', validacion_oc_creacion) AS 'mes', sum(monto_inicial) AS monto, strftime('%Y', validacion_oc_creacion) AS 'año'
+        FROM info_webpo
+        WHERE SUBSTRING(pep, 1,9)='P-0055-24' 
+        GROUP BY estado_ip, strftime('%m', validacion_oc_creacion) """).fetchall()
+    
+    oc_generadas_dic = {
+        "Certificado": [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "En Certificación": [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Terminado":[0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Diseño Ejecutado":[0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Diseño":[0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Registrado":[0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Cancelado":[0,0,0,0,0,0,0,0,0,0,0,0,0]
+    }
+
+    total_generadas = 0
+    for i in oc_generadas_por_estado:
+        if i['año'] == '2023':
+            oc_generadas_dic[i['estado_ip']][0] = i['monto']+ oc_generadas_dic[i['estado_ip']][0]
+        else:
+            oc_generadas_dic[i['estado_ip']][int(i['mes'])] = i['monto'] + oc_generadas_dic[i['estado_ip']][int(i['mes'])]
+        total_generadas = total_generadas + i['monto']
+
+    oc_generadas_dic = json.dumps(oc_generadas_dic)
+    
+
+
     if en_certificacion is None:
         en_certificacion=0
-    return render_template('/reportes/gestion_presupuestal.html', certificado=certificado, en_certificacion=en_certificacion)
-    oc_generadas = 0
-    ppto_habilitado = certificado + en_certificacion + oc_generadas
+    if con_solicitud_oc is None:
+        con_solicitud_oc=0
+
+    cert_cant = {'01': 0, '02': 0, '03': 0, '04': 0, '05':0, '06':0, '07':0, '08':0, '09':0, '10':0, '11': 0, '12':0}
+    cert_monto_ini = {'01': 0, '02': 0, '03': 0, '04': 0, '05':0, '06':0, '07':0, '08':0, '09':0, '10':0, '11': 0, '12':0}
+    cert_monto_fin = {'01': 0, '02': 0, '03': 0, '04': 0, '05':0, '06':0, '07':0, '08':0, '09':0, '10':0, '11': 0, '12':0}
+    cert_monto_prom = {'01': 0, '02': 0, '03': 0, '04': 0, '05':0, '06':0, '07':0, '08':0, '09':0, '10':0, '11': 0, '12':0}
+    
+    for i in certificados:
+        cert_cant[i['mes']] = i['cant']
+        cert_monto_ini[i['mes']] = i['monto_inicial']
+        cert_monto_fin[i['mes']] = i['monto_final']
+        cert_monto_prom[i['mes']] = i['monto_promedio']
+    cant_cert = list(cert_cant.values())
+    monto_ini_cert = list(cert_monto_ini.values())
+    monto_fin_cert = list(cert_monto_fin.values())
+    monto_prom_cert = list(cert_monto_prom.values())
+
+
+    ppto_habilitado = sum(monto_fin_cert) + en_certificacion + oc_creadas
+
+    total_generadas = abreviaNumero(total_generadas)
+    prom_certificacion = abreviaNumero(monto_prom_cert)
+    certificado = abreviaNumero(monto_fin_cert)
+    en_certificacion = abreviaNumero(en_certificacion)
+    oc_creadas = abreviaNumero(oc_creadas)
+    con_solicitud_oc = abreviaNumero(con_solicitud_oc)
+    ppto_habilitado = abreviaNumero(ppto_habilitado)
+
+    
+    return render_template('/reportes/gestion_presupuestal.html',  certificado_por_pep=certificado_por_pep, con_solicitud_oc_detalle=con_solicitud_oc_detalle ,oc_generadas_dic=oc_generadas_dic,  prom_certificacion=prom_certificacion, pend_certificar_detalle=pend_certificar_detalle, en_validacion_detalle=en_validacion_detalle, en_certificacion_detalle=en_certificacion_detalle, cant_cert=cant_cert, monto_ini_cert=monto_ini_cert, monto_fin_cert=monto_fin_cert, monto_prom_cert=monto_prom_cert, ppto_habilitado = ppto_habilitado, total_generadas=total_generadas,  con_solicitud_oc=con_solicitud_oc, certificado=certificado, en_certificacion=en_certificacion, oc_creadas=oc_creadas)
+    
+    
 @bp.route('/reporte/tiempos_inf_red')
 @login_required
 def tiempos_inf_red():       
@@ -518,7 +621,7 @@ def tiempos_inf_red():
         WHERE strftime('%Y', fecha_correo) = '2024'""").fetchall()[0][0]
 
     atendidas_por_mes = get_db().execute(
-        """ SELECT strftime('%m', fecha_correo) AS mes, count(*) AS cant, avg(floor(julianday(fecha_respuesta) - julianday(fecha_correo))) AS prom
+        """ SELECT strftime('%m', fecha_correo) AS mes, count(*) AS cant, avg(CAST((julianday(fecha_respuesta) - julianday(fecha_correo)) AS INTEGER)) AS prom
             FROM inf_red
             WHERE strftime('%Y', fecha_correo) = '2024' AND estado_inf_red = 'ATENDIDO' 
             GROUP BY strftime('%m', fecha_correo)""").fetchall()
@@ -561,7 +664,7 @@ def tiempos_inf_red():
 @login_required
 def tiempos_diseño():
     ejecutados_por_mes = get_db().execute(
-        """ SELECT strftime('%m',fecha_termino_diseno) AS mes, count(*) AS cant, sum(montoIGV) AS monto,  avg(floor(julianday(fecha_termino_diseno) - julianday(fecha_inicio_diseno))) AS prom
+        """ SELECT strftime('%m',fecha_termino_diseno) AS mes, count(*) AS cant, sum(montoIGV) AS monto,  avg(CAST((julianday(fecha_termino_diseno) - julianday(fecha_inicio_diseno)) AS INTEGER)) AS prom
         FROM presupuesto
         WHERE strftime('%Y', fecha_creacion) = '2024' AND (strftime('%Y',fecha_entrega_ppto) = '2024' OR strftime('%Y',fecha_termino_diseno) = '2024') 
         GROUP BY strftime('%m',fecha_termino_diseno) """).fetchall()
@@ -578,7 +681,7 @@ def tiempos_diseño():
 
     ejecutados = sum(cant_mes)
     if sum(monto_mes)>1000000:
-        ejecutados_monto = str(round(sum(monto_mes)/1000000,1))+' M'
+        ejecutados_monto = str(round(sum(monto_mes)/1000000,1))+' MM'
     elif sum(monto_mes)>1000:
          ejecutados_monto = str(round(sum(monto_mes)/1000,1))+' K'
     else:
@@ -603,7 +706,7 @@ def tiempos_diseño():
 @login_required
 def tiempos_presupuesto():
     emitidos_por_mes = get_db().execute(
-        """ SELECT strftime('%m',fecha_entrega_ppto) AS mes, count(*) AS cant, sum(montoIGV) AS monto,  avg(floor(julianday(fecha_entrega_ppto) - julianday(fecha_termino_diseno))) AS prom
+        """ SELECT strftime('%m',fecha_entrega_ppto) AS mes, count(*) AS cant, sum(montoIGV) AS monto,  avg(CAST((julianday(fecha_entrega_ppto) - julianday(fecha_termino_diseno)) AS INTEGER)) AS prom
         FROM presupuesto
         WHERE strftime('%Y', fecha_creacion) = '2024' AND strftime('%Y',fecha_entrega_ppto) = '2024' 
         GROUP BY strftime('%m',fecha_entrega_ppto) """).fetchall()
@@ -620,7 +723,7 @@ def tiempos_presupuesto():
 
     emitidos = sum(cant_mes)
     if sum(monto_mes)>1000000:
-        emitidos_monto = str(round(sum(monto_mes)/1000000,1))+' M'
+        emitidos_monto = str(round(sum(monto_mes)/1000000,1))+' MM'
     elif sum(monto_mes)>1000:
          emitidos_monto = str(round(sum(monto_mes)/1000,1))+' K'
     else:
@@ -645,9 +748,9 @@ def tiempos_presupuesto():
 @login_required
 def tiempos_coordinacion():
     pagados_por_mes = get_db().execute(
-        """ SELECT REPLACE(REPLACE(REPLACE(estado,'Pagado',''),'2023',''),' ','') AS mes, count(*) AS cant, sum(montoIGV) AS monto,  avg(floor(julianday(fecha_firma_convenio) - julianday(fecha_entrega_ppto))) AS prom
+        """ SELECT REPLACE(REPLACE(REPLACE(estado,'Pagado',''),'2023',''),' ','') AS mes, count(*) AS cant, sum(montoIGV) AS monto,  avg(CAST((julianday(fecha_firma_convenio) - julianday(fecha_entrega_ppto)) AS INTEGER )) AS prom
         FROM presupuesto
-        WHERE SUBSTRING(estado,1,6)='Pagado' AND SUBSTRING(estado,-1)='3' 
+        WHERE SUBSTR(estado,1,6)='Pagado' AND SUBSTR(estado,-1)='3' 
         GROUP BY mes """).fetchall()
     meses_cant = {'Enero': 0, 'Febrero': 0, 'Marzo': 0, 'Abril': 0, 'Mayo':0, 'Junio':0, 'Julio':0, 'Agosto':0, 'Setiembre':0, 'Octubre':0, 'Noviembre': 0, 'Diciembre':0}
     meses_prom = {'Enero': 0, 'Febrero': 0, 'Marzo': 0, 'Abril': 0, 'Mayo':0, 'Junio':0, 'Julio':0, 'Agosto':0, 'Setiembre':0, 'Octubre':0, 'Noviembre': 0, 'Diciembre':0}
@@ -670,7 +773,7 @@ def tiempos_coordinacion():
 
     pagados = sum(cant_mes)
     if sum(monto_mes)>1000000:
-        pagados_monto = str(round(sum(monto_mes)/1000000,1))+' M'
+        pagados_monto = str(round(sum(monto_mes)/1000000,1))+' MM'
     elif sum(monto_mes)>1000:
          pagados_monto = str(round(sum(monto_mes)/1000,1))+' K'
     else:
@@ -680,7 +783,7 @@ def tiempos_coordinacion():
         """ SELECT  e.agrupacion_etapas, count(*), sum(montoIGV)
             FROM presupuesto p 
             LEFT JOIN  estadosOP e ON p.estado=e.estado
-            WHERE SUBSTRING(p.estado,1,6)='Pagado' AND SUBSTRING(p.estado,-1)='3'
+            WHERE SUBSTR(p.estado,1,6)='Pagado' AND SUBSTR(p.estado,-1)='3'
             GROUP BY e.agrupacion_etapas""").fetchall()
     estados,cant,monto = zip(*oc_ejecucion)
     estados_str=','.join(estados)
@@ -812,29 +915,61 @@ def download_convenios():
     df.to_excel("convenios.xlsx", startcol=0, index=False)
     return send_file("../convenios.xlsx", as_attachment=True)
 
+@bp.route('/download_info_webpo')
+def download_info_webpo():
+    data_base = get_db().execute(
+        """SELECT 
+        *
+       
+        FROM info_webpo"""
+        
+    )
+
+    data = data_base.fetchall()
+    columns = [desc[0] for desc in data_base.description]
+    df = pd.DataFrame(list(data), columns=columns)
+    df.to_excel("info_webpo.xlsx", startcol=0, index=False)
+    return send_file("../info_webpo.xlsx", as_attachment=True)
 
 def tmas():
     tma_info_red = get_db().execute(
-        """ SELECT CAST(avg(floor(julianday(fecha_respuesta) - julianday(fecha_correo))) AS INT)
+        """ SELECT CAST(avg(CAST((julianday(fecha_respuesta) - julianday(fecha_correo)) AS INTEGER)) AS INT)
         FROM inf_red
         WHERE strftime('%Y', fecha_correo) = '2024' AND estado_inf_red = 'ATENDIDO' """).fetchall()[0][0] 
     tma_oc = 25 
     
     tma_diseño = get_db().execute(
-        """ SELECT CAST (avg(floor( julianday(fecha_termino_diseno) - julianday(fecha_inicio_diseno) ) ) AS INT )
+        """ SELECT CAST (avg(CAST( (julianday(fecha_termino_diseno) - julianday(fecha_inicio_diseno)) AS INTEGER ) ) AS INT )
         FROM presupuesto
         WHERE strftime('%Y', fecha_creacion) = '2024' AND (strftime('%Y',fecha_entrega_ppto) = '2024' OR strftime('%Y',fecha_termino_diseno) = '2024') """).fetchall()[0][0]
     tma_ppto = get_db().execute(
-        """ SELECT CAST (avg(floor( julianday(fecha_entrega_ppto) - julianday(fecha_termino_diseno) ) ) AS INT )
+        """ SELECT CAST (avg(CAST( (julianday(fecha_entrega_ppto) - julianday(fecha_termino_diseno)) AS INTEGER ) ) AS INT )
         FROM presupuesto
         WHERE strftime('%Y', fecha_creacion) = '2024' AND strftime('%Y',fecha_entrega_ppto) = '2024' """).fetchall()[0][0]
     tma_coordinacion = get_db().execute(
-        """ SELECT CAST (avg(floor( julianday(fecha_firma_convenio) - julianday(fecha_entrega_ppto) ) ) AS INT )
+        """ SELECT CAST (avg(CAST( (julianday(fecha_firma_convenio) - julianday(fecha_entrega_ppto)) AS INTEGER ) ) AS INT )
         FROM presupuesto
-        WHERE SUBSTRING(estado,1,6)='Pagado' AND SUBSTRING(estado,-1)='3'  """).fetchall()[0][0]
+        WHERE SUBSTR(estado,1,6)='Pagado' AND SUBSTR(estado,-1)='3'  """).fetchall()[0][0]
     tma_ppto = 8    
     
     tma_total=tma_info_red+tma_oc+tma_ppto+tma_coordinacion
 
     
     return [tma_info_red, tma_oc, tma_diseño, tma_ppto, tma_coordinacion,tma_total]
+
+
+def abreviaNumero(monto):
+    if isinstance(monto, list):
+        if sum(monto)>1000000:
+            return str(round(sum(monto)/1000000,1))+' MM'
+        elif sum(monto)>1000:
+            return str(round(sum(monto)/1000,1))+' K'
+        else:
+            return round(sum(monto),1)
+    else:
+        if monto>1000000:
+            return str(round(monto/1000000,1))+' MM'
+        elif monto>1000:
+            return str(round(monto/1000,1))+' K'
+        else:
+            return round(monto,1)

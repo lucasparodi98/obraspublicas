@@ -9,11 +9,12 @@
     .dataframe {
       height: 150px;
       line-height: 1em;
-      overflow-x: hidden;
+      overflow-x: scroll;
       overflow-y: scroll;
       width: 100%;
       border: 1px solid;
       text-align: center !important;
+      
     }
   </style>
   <br>
@@ -32,8 +33,60 @@
       {% endfor %}
     {% endif %}
     <br>
+    <div class="row">
+      <div class="col">
+        <label for="webPO_reporteOC">Cargar REPORTE ORDEN COMPRA (formato .csv)</label>
+        <br>
+        <input id="webPO_reporteOC" name="webPO_reporteOC" type="file" class="custom-file-input" >
+      </div>
+    </div>
+    <br>
+    {% if tables_reporteOC %}
+      {% for table in tables_reporteOC %}
+        {{ table | safe }}
+      {% endfor %}
+    {% endif %}
+    <br>
+    <div class="row">
+      <div class="col">
+        <label for="webPO_detallePlanCSV">Cargar REPORTE DETALLE PLAN CSV (formato .csv)</label>
+        <br>
+        <input id="webPO_detallePlanCSV" name="webPO_detallePlanCSV" type="file" class="custom-file-input" >
+      </div>
+    </div>
+    <br>
+    
+    <br>
+    <div class="row">
+      <div class="col">
+        <label for="webPO_itemplanMadre">Cargar REPORTE ItemplanMadre_cv.csv (formato .csv)</label>
+        <br>
+        <input id="webPO_itemplanMadre" name="webPO_itemplanMadre" type="file" class="custom-file-input" >
+      </div>
+    </div>
+    <br>
+    
+    <br>
+    <div class="row">
+      <div class="col">
+        <label for="webPO_resu">Cargar ITEMPLAN MADRE - RESUMEN (formato .csv)</label>
+        <br>
+        <input id="webPO_resu" name="webPO_resu" type="file" class="custom-file-input" >
+      </div>
+    </div>
+    <br>
+    {% if tables_info_webpo %}
+      {% for table in tables_info_webpo %}
+        {{ table | safe }}
+      {% endfor %}
+    {% endif %}
+
+    <br>
+    
+
     <input class="btn btn-primary" type="submit" value="Importar Datos">
   </form>
 
+  
 {% endblock %}
 

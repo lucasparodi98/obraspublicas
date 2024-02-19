@@ -14,7 +14,7 @@
                 <div class="CD_cards">
                     <div class="card_flex">
                         <div>
-                            <div class="number">{{"{:,.1f}".format(certificado/1000000)}} MM</div>
+                            <div class="number">{{certificado}}</div>
                             <div class="card-name">Certificado</div>
                         </div>
                         
@@ -22,7 +22,7 @@
                     </div>
                     <div class="card_flex">
                         <div>
-                            <div class="number">{{"{:,.1f}".format(en_certificacion/1000000)}} MM</div>
+                            <div class="number">{{en_certificacion}}</div>
                             <div class="card-name">En Certificación</div>
                         </div> 
                         
@@ -31,8 +31,8 @@
                     </div>
                     <div class="card_flex">
                         <div>
-                            <div class="number">0.5 MM</div>
-                            <div class="card-name">OC Generadas</div>
+                            <div class="number">{{oc_creadas}}</div>
+                            <div class="card-name">OC Creadas</div>
                         </div> 
                         
                         <i class="far fa-clipboard icono"></i>
@@ -41,11 +41,21 @@
                     
                     <div class="card_flex" style="background-color: rgb(180,223,195)">
                         <div>
-                            <div class="number">1.5 MM</div>
+                            <div class="number">{{ppto_habilitado}}</div>
                             <div class="card-name" style="color: #299b63;">Presupuesto Habilitado</div>
                         </div>
                         
                         <i class="fas fa-hand-holding-usd icono"></i>
+                    </div>
+
+                    <div class="card_flex">
+                        <div>
+                            <div class="number">{{con_solicitud_oc}}</div>
+                            <div class="card-name">Con Solicitud de OC</div>
+                        </div> 
+                        
+                        <i class="fas fa-ticket-alt icono"></i>
+                        
                     </div>
                     
                 </div>
@@ -54,22 +64,29 @@
                     <div class="chart">
                         <h2>Certificacion 2024</h2>
                         <br>
-                        <canvas id="CD2"></canvas>
+                        <canvas id="CD2" cant_cert="{{cant_cert}}", monto_ini_cert="{{monto_ini_cert}}", monto_fin_cert="{{monto_fin_cert}}", monto_prom_cert="{{monto_prom_cert}}"></canvas>
                         <br>
-                        <div style="text-align:center; font-size:14px">Costo Promedio de Diseño 2.4 MM</div>
+                        <div style="text-align:center; font-size:14px"><strong>Costo Promedio de Diseño de las OC Certificadas en 2024: S/. {{prom_certificacion}}</strong></div>
+                        <br>
+                        <div style="text-align:center; font-size:14px"><strong>OC Certificadas con PEP 2023: S/.{{"{:,.2f}".format(certificado_por_pep[0][1])}}</strong></div>
+                        <div style="text-align:center; font-size:14px"><strong>OC Certificadas con PEP 2024: S/.{{"{:,.2f}".format(certificado_por_pep[1][1])}}</strong></div>
                     </div>
                     <div class="chart">
-                        <h2>OC Generadas 2024</h2>
+                        <h2>OC Generadas con PEP 2024</h2>
                         <br>
-                        <canvas id="OC_generadas" ></canvas>
+                        <canvas id="OC_generadas" oc_generadas_dic="{{oc_generadas_dic}}"></canvas>
                         <br>
-                        <div style="text-align:center; font-size:14px">Total OC Generadas 1.5 MM</div>
+                        <div style="text-align:center; font-size:14px"><strong>Total OC Generadas con PEP 2024: S/.{{total_generadas}}</strong></div>
                     </div>
                 </div>
-                    
-                
+                 
             <!--=============== GRAFICOS ===================================================-->
-            
+            {% for i in oc_generadas_por_estado %}
+                {% for x in i %}
+                    {{x}}
+                {% endfor %}
+                <br>
+            {% endfor %}
             <div class="fila3">
                 <div class="chart">
                     <h2>Comprometido </h2>
@@ -84,106 +101,35 @@
                           <div id="collapse1" class="panel-collapse collapse in">
                               <div class="panel-body">
                                   <table class="table table-bordered table-sm table-hover">
-                                  
+
                                       <tr>
-                                      <th width="150px">DESCRIPCIÓN ENTIDAD</th>
-                                      <th>CÓDIGO UNICO</th>
-                                      <th>IP MADRE/IP</th>
+                                      <th>FECHA DE SOLICITUD OC CERTIFICACION</th> 
+                                      <th>IP MADRE</th>
+                                      <th>DESCRIPCIÓN ENTIDAD</th>                                      
                                       <th>BAUTIZO</th>
-                                      <th>WEB PO</th>
-                                      <th width="120px">SOLICITUD OC</th>
-                                      <th width="20px">CANT PROY</th>
-                                      <th width="20px">DÍAS TRANSC.</th>
+                                      <th>MONTO INICIAL</th>
+                                      <th>MONTO FINAL</th>
                                       </tr>
                                       
-                                      <th rowspan="7">MUNICIPALIDAD DE LIMA</th>
+                                      {% set total_ini = namespace(value=0) %}
+                                      {% set total_fin = namespace(value=0) %}
+                                      {% for i in en_certificacion_detalle %}
+                                        <tr>
+                                        <td>{{i['solicitud_oc_actual']}}</td>
+                                        <td>{{i['ip_madre']}}</td>
+                                        <td>{{i['entidad']}}</td>                                        
+                                        <td>{{i['bautizo']}}</td>
+                                        <td>S/. {{"{:,.2f}".format(i['monto_inicial'])}}</td>
+                                        <td>S/. {{"{:,.2f}".format(i['monto_diseño_final'])}}</td>
+                                        {% set total_ini.value = total_ini.value + i['monto_inicial']%}
+                                        {% set total_fin.value = total_fin.value + i['monto_diseño_final']%}
+                                        </tr>
+                                      {% endfor %}
                                       <tr>
-                                      <td>2023-800617</td>
-                                      <td>M-24-01-026</td>
-                                      <td>Jr. SEBASTIAN BARRANCA - LA VICTORIA LIMA </td>
-                                      <td>Registrado</td>
-                                      <td>SIN SOLICITUD DE OC</td>
-                                      <td>1</td>
-                                      <td>9</td>
-                                      </tr>
-                                      <tr>
-                                          <td>2023-874415</td>
-                                      <td>M-24-01-019</td>
-                                      <td>AA.HH LA RINCONADA - PAMPLONA ALTA -SJM - LIMA</td>
-                                      <td>Registrado</td>
-                                      <td>SIN SOLICITUD DE OC</td>
-                                      <td>1</td>
-                                      <td>9</td>
-                                      </tr>
-                                      <tr>
-                                          <td>2023-701718</td>
-                                      <td>M-24-01-020</td>
-                                      <td>AV. ISIDRO ALCIBAR -AV GRAU - TRAMO ENTRE AV ZARUMILLA Y AV CAQUETA -SMP - LIMA </td>
-                                      <td>Registrado</td>
-                                      <td>SIN SOLICITUD DE OC</td>
-                                      <td>1</td>
-                                      <td>9</td>
-                                      </tr>
-                                      <tr>
-                                          <td>2023-704170</td>
-                                      <td>M-24-01-021</td>
-                                      <td>JR. FRANCISCO JAVIER LUNA PIZARRO - LA VICTORIA.</td>
-                                      <td>Registrado</td>
-                                      <td>SIN SOLICITUD DE OC</td>
-                                      <td>1</td>
-                                      <td>9</td>
-                                      </tr>
-                                      <tr>
-                                          <td>2023-710077</td>
-                                      <td>M-24-01-022</td>
-                                      <td>AV. CRISTO BLANCO - SAN FRANCISO DE LA CRUZ - PAMPLONA ALTA - SJM</td>
-                                      <td>Registrado</td>
-                                      <td>SIN SOLICITUD DE OC</td>
-                                      <td>1</td>
-                                      <td>9</td>
-                                      </tr>
-                                      <tr>
-                                          <td>2023-714035</td>
-                                      <td>M-24-01-023</td>
-                                      <td>VIA DE INGRESO A PUCUSANA.</td>
-                                      <td>Registrado</td>
-                                      <td>SIN SOLICITUD DE OC</td>
-                                      <td>1</td>
-                                      <td>9</td>
-                                      </tr>
-                                      <tr>
-                                      <th>MTC-DIRECCIÓN DE DISPONIBILIDAD DE PREDIOS</td>
-                                      <td>2023-714035</td>
-                                      <td>M-24-01-018</td>
-                                      <td>EVITAMIENTO CHICLAYO(EV08) PROGRESIVA 779+900 PN.</td>
-                                      <td>Registrado</td>
-                                      <td>SIN SOLICITUD DE OC</td>
-                                      <td>1</td>
-                                      <td>9</td>
-                                      </tr>
-              
-                                      <tr>
-                                          <th>Consorcio Constructor M2 de Lima</td>
-                                          <td>2024-943682</td>
-                                          <td>M-24-01-024</td>
-                                          <td>REUBICACION DE POSTE EN E4-06 ESTACION QUILCA LINEA 2 METRO DE LIMA</td>
-                                          <td>Registrado</td>
-                                          <td>SIN SOLICITUD DE OC</td>
-                                          <td>1</td>
-                                          <td>9</td>
-                                      </tr>
-              
-                                          <tr>
-                                              <th>ANA RIOS CONSULTORES</td>
-                                              <td>2023-304382</td>
-                                              <td>M-24-01-025</td>
-                                              <td>PUENTES GARCIA RADA Y PLAYA NORTE - PUNTA HERMOSA -LIMA</td>
-                                              <td>Registrado</td>
-                                              <td>SIN SOLICITUD DE OC</td>
-                                              <td>1</td>
-                                              <td>9</td>
-                                          </tr>
-                                      
+                                        <th colspan="4">Total </th>
+                                        <th>S/. {{"{:,.2f}".format(total_ini.value)}}</th>
+                                        <th>S/. {{"{:,.2f}".format(total_fin.value)}}</th>
+                                    </tr>
               
                                   </table>
                               
@@ -201,52 +147,37 @@
                             <div class="panel-body">
                               <table class="table table-bordered table-sm table-hover">
                                   
-                                  <tr>
-                                  <th>CÓDIGO UNICO</th>
-                                  <th>EECC</th>
-                                  <th>DESCRIPCIÓN ENTIDAD</th>
-                                  <th>BAUTIZO</th>
-                                  <th>COSTO DE DISEÑO</th>
-                                  <th width="20px">CANT PROY</th>
-                                  <th width="20px">DÍAS TRANSC.</th>
-                                  </tr>
-                                  <tr>
-                                  <td>2023-907269</td>
-                                  <td>LITEYCA</td>
-                                  <td>PEDELTA INGENIERIA SAC,</td>
-                                  <td>PUENTE JORGE CHAVEZ -CHIMBOTE-ANCASH</td>
-                                  <td>S/27,431.22</td>
-                                  <td>1</td>
-                                  <td>2</td>
-                                  </tr>
-                                  <tr>
-                                  <td>2023-1678226273525</td>
-                                  <td>COMFICA</td>
-                                  <td>SEDAPAL</td>
-                                  <td>SEDAPAL - TRABAJOS EN EL CERRO EL AGUSTINO FRENTE 2</td>
-                                  <td>S/18,968.05</td>
-                                  <td>1</td>
-                                  <td>5</td>
-                                  </tr>
-                                  <tr>
-                                  <td>2023-881266</td>
-                                  <td>DOMINION</td>
-                                  <td>GOBIERNO REGIONAL DE TACNA</td>
-                                  <td>PRESUPUESTO ESTIMADO DE AV. MAGOLLO TACNA</td>
-                                  <td>S/13,228.62</td>
-                                  <td>1</td>
-                                  <td>7</td>
-                                  </tr>
-                                  <tr>
-                                      <td>2023-997813</td>
-                                      <td>COBRA</td>
-                                      <td>CONSORCIO CONSTRUCTOR CIUDAD BLANCA</td>
-                                      <td>CIUDAD DEL PESCADOR-PAITA</td>
-                                      <td>S/6,067.33</td>
-                                      <td>1</td>
-                                      <td>7</td>
-                                  </tr>
+                                    <tr>
+                                    <th>RESPONSABLE</th> 
+                                    <th>EECC</th>
+                                    <th>IP MADRE</th>                                                                        
+                                    <th>BAUTIZO</th>
+                                    <th>MONTO INICIAL</th>
+                                    <th>MONTO FINAL</th>
+                                    </tr>
+
+                                    {% set total_ini = namespace(value=0) %}
+                                    {% set total_fin = namespace(value=0) %}
+                                    {% for i in en_validacion_detalle %}
+                                      <tr>
+                                      <td>{{i['estado_firma']}}</td>
+                                      <td>{{i['eecc']}}</td>
+                                      <td>{{i['ip_madre']}}</td>                                      
+                                      <td>{{i['bautizo']}}</td>
+                                      <td>S/. {{"{:,.2f}".format(i['monto_inicial'])}}</td>
+                                      <td>S/. {{"{:,.2f}".format(i['monto_diseño_final'])}}</td>
+                                      {% set total_ini.value = total_ini.value + i['monto_inicial']%}
+                                      {% set total_fin.value = total_fin.value + i['monto_diseño_final']%}
+                                    </tr>
+                                      
+                                      
+                                    {% endfor %}
                                   
+                                    <tr>
+                                        <th colspan="4">Total </th>
+                                        <th>S/. {{"{:,.2f}".format(total_ini.value)}}</th>
+                                        <th>S/. {{"{:,.2f}".format(total_fin.value)}}</th>
+                                    </tr>
                                   
           
                               </table>
@@ -261,7 +192,43 @@
                           </div>
                           <div id="collapse4" class="panel-collapse collapse in">
                             <div class="panel-body">
-  
+                                <table class="table table-bordered table-sm table-hover">
+                                  
+                                    <tr>
+                                    <th>ESTADO IP</th> 
+                                    <th>EECC</th>
+                                    <th>IP MADRE</th>                                                                        
+                                    <th>BAUTIZO</th>
+                                    <th>ESTADO CAMPO</th>
+                                    <th>FECHA CREACION OC</th>
+                                    <th>MONTO INICIAL</th>
+                                    <th>MONTO FINAL</th>
+                                    
+                                    </tr>
+                                    {% set total_ini = namespace(value=0) %}
+                                    {% set total_fin = namespace(value=0) %}
+                                    {% for i in pend_certificar_detalle %}
+                                      <tr>
+                                      <td>{{i['estado_ip']}}</td>
+                                      <td>{{i['eecc']}}</td>
+                                      <td>{{i['ip_madre']}}</td>                                      
+                                      <td>{{i['bautizo']}}</td>
+                                      <td>{{i['estado']}}</td>
+                                      <td>{{i['solicitud_oc_creacion']}}</td>
+                                      <td>S/. {{"{:,.2f}".format(i['monto_inicial'])}}</td>
+                                      <td>S/. {{"{:,.2f}".format(i['monto_diseño_final'])}}</td>
+                                      {% set total_ini.value = total_ini.value + i['monto_inicial']%}
+                                      {% set total_fin.value = total_fin.value + i['monto_diseño_final']%}
+                                      </tr>
+                                    {% endfor %}
+                                      
+                                    <tr>
+                                        <th colspan="6">Total </th>
+                                        <th>S/. {{"{:,.2f}".format(total_ini.value)}}</th>
+                                        <th>S/. {{"{:,.2f}".format(total_fin.value)}}</th>
+                                    </tr>
+          
+                              </table>
                             </div>
                           </div>
                         </div>
@@ -270,65 +237,35 @@
                         <div class="panel panel-default">
                           <div class="panel-heading">
                             <h4 class="panel-title">
-                              <a data-toggle="collapse" href="#collapse6">Con OC Creada</a>
+                              <a data-toggle="collapse" href="#collapse6">Con Solicitud de OC</a>
                             </h4>
                           </div>
                           <div id="collapse6" class="panel-collapse collapse in">
                             <div class="panel-body">
                               <table class="table table-bordered table-sm table-hover">
                           
-                                  <tr>
-                                   <th>ESTADO</th>
-                                   <th>CODIGO UNICO</th>
-                                   <th>IP MADRE</th>
-                                   <th>BAUTIZO</th>
-                                   <th width="20px">CANT. PROY</th>
-                                   <th width="30px">MONTO<br>(SIN I.G.V.)</th>
-                                  </tr>
-                                  <tr>
-                                  <th rowspan="4">Pagado Febrero 2024</th>
-                                  <td>2</td>
-                                  </tr>
-                                  <tr>
-                                      <td>1</td>
-                                      </tr>  
+                                <tr>
+                                    <th>ESTADO IP</th> 
+                                    <th>IP MADRE</th>                                                                        
+                                    <th>BAUTIZO</th>
+                                    <th>MONTO</th>
+
+                                    </tr>
+                                    {% set total_sol_OC = namespace(value=0) %}
+                                    {% for i in con_solicitud_oc_detalle %}
                                       <tr>
-                                          <td>3</td>
-                                          </tr> 
-                                          <tr>
-                                              <td>4</td>
-                                              </tr>    
-                                      
-                                  <tr>
-                                   <th colspan="8">Pagado Febrero 2024 Total</th>
-                                  </tr>
-          
-                                  <tr>
-                                  <th rowspan="6">Pagado Marzo 2024</th>
-                                  </tr>
-                                  <tr>
-                                  <td>1</td>
-                                  </tr>
-                                  <tr>
-                                      <td>2</td>
+                                      <td>{{i['estado_ip']}}</td>
+                                      <td>{{i['ip_madre']}}</td>                                      
+                                      <td>{{i['bautizo']}}</td>
+                                      <td>S/. {{"{:,.2f}".format(i['monto_actual'])}}</td>
+                                      {% set total_sol_OC.value = total_sol_OC.value + i['monto_actual']%}
                                       </tr>
-                                      <tr>
-                                          <td>3</td>
-                                          </tr>
-                                          <tr>
-                                              <td>4</td>
-                                              </tr>
-                                              <tr>
-                                                  <td>5</td>
-                                                  </tr>
-                                                  
-                                   
+                                    {% endfor %}
                                   
-                                  <tr>
-                                   <th colspan="8">Pagado Marzo 2024 Total</th>
-                                  </tr>
-                                  
-          
+                                    <tr>
+                                        <th colspan="3">Total </th>
+                                        <th>S/. {{"{:,.2f}".format(total_sol_OC.value)}}</th>
+                                    </tr>
   
           
                               </table>
@@ -346,7 +283,7 @@
 
     {% block scripts %}     
                 
-
+    
     
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -357,21 +294,115 @@
 
     <script>
         $( document ).ready(function() {
+        
+
+
+
         /*-----------Chart Vertical Bars Group,  OC Generadas---------------------------*/
+        const topLabels = {
+            id: 'topLabels',
+            afterDatasetsDraw(chart, args, pluginOptions){
+                const { ctx,scales:{x,y} } = chart;
+
+                chart.data.datasets[0].data.forEach((datapoint,index) =>{
+                    const datasetArray = [];
+
+                    chart.data.datasets.forEach((dataset) => {
+                        datasetArray.push(dataset.data[index])
+                    })
+
+                    function totalSum(total, values){
+                        return total + values;
+                    };
+
+                    let sum = datasetArray.reduce(totalSum,0);
+
+                    if(sum >1000000 ){
+                        sum =   Math.round(sum/1000000*10)/10 + ' MM';
+                    }else if(sum >=1000){
+                        sum =  Math.round(sum/1000*10)/10 + ' K';
+                        
+                    }else if(sum==0){
+                        sum = '';
+                    }else{
+                        sum =  sum;
+                    }
+
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillStyle = 'black';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(sum ,x.getPixelForValue(index),chart.getDatasetMeta(6).data[index].y-10);
+
+
+                })
+
+                
+            }
+        }
+
+        var oc_generadas_dic = JSON.parse(document.getElementById('OC_generadas').getAttribute('oc_generadas_dic'));
+        var cant_mes = JSON.parse(document.getElementById('OC_generadas').getAttribute('cant_mes'));
+        var monto_mes = JSON.parse(document.getElementById('OC_generadas').getAttribute('monto_mes'));
+
         var ctx2 = document.getElementById('OC_generadas').getContext('2d');
         var myChart2 = new Chart(ctx2, {
             type: 'bar',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                labels: ['2023','Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'],
 
                 datasets: [{
-                    label: 'Proyeccion de pago',
-                    data: [0, 0.256, 5.4, 2.3,0.367,0,4.8,3.1,0.09],
+                    label: 'Certificado',
+                    data: oc_generadas_dic.Certificado,
                     backgroundColor: ['rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)'],
                     borderColor: ['rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)','rgb(68,175,105,1)'],
                     borderWidth: 1,
                     order:2
-                }]
+                },{
+                    label: 'En Certificación',
+                    data: oc_generadas_dic['En Certificación'],
+                    backgroundColor: 'rgb(2,35,28)',
+                    borderColor: 'rgb(2,35,28)',
+                    borderWidth: 1,
+                    order:2
+                },{
+                    label: 'Terminado',
+                    data: oc_generadas_dic.Terminado,
+                    backgroundColor: 'rgb(0,77,37)',
+                    borderColor: 'rgb(0,77,37)',
+                    borderWidth: 1,
+                    order:2
+                },{
+                    label: 'Diseño Ejecutado',
+                    data: oc_generadas_dic['Diseño Ejecutado'] ,
+                    backgroundColor: 'rgb(17,130,59)',
+                    borderColor: 'rgb(17,130,59)',
+                    borderWidth: 1,
+                    order:2
+                },{
+                    label: 'Diseño',
+                    data: oc_generadas_dic.Diseño,
+                    backgroundColor: 'rgb(72,191,83)',
+                    borderColor: 'rgb(72,191,83)',
+                    borderWidth: 1,
+                    order:2
+                },{
+                    label: 'Registrado',
+                    data: oc_generadas_dic.Registrado,
+                    backgroundColor: 'rgb(145,240,134)',
+                    borderColor: 'rgb(145,240,134)',
+                    borderWidth: 1,
+                    order:2
+                },{
+                    label: 'Cancelado',
+                    data: oc_generadas_dic.Cancelado,
+                    backgroundColor: 'rgb(169,146,125)',
+                    borderColor: 'rgb(169,146,125)',
+                    borderWidth: 1,
+                    order:2
+                }
+            
+            
+                ]
 
             },
             options: {
@@ -381,45 +412,59 @@
                 scales:{
                     
                     x:{
-                        grid:{drawOnChartArea: false}
+                        grid:{drawOnChartArea: false},
+                        stacked:'true'
+                    },
+                    y:{
+                        stacked:'true',
+                        
                     }
                 },
                 plugins:{
                     legend: {
-                        display: false
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 6
+                            }
                     },
                     datalabels:{
-                        color:'grey',
+                        color:'white',
                         maintainAspectRatio: false,
-                        align: 'top',
-                        anchor: 'end',
+                        
                         formatter: function(value, context) {
-                            if(value >0 && value <1){
-                                return value*1000 + ' K';
-                            }else if(value >0){
-                                return value + ' MM';
+                            if(value >1000000 ){
+                                return Math.round(value/1000000*10)/10 + ' MM';
+                            }else if(value >=1000){
+                                return Math.round(value/1000*10)/10 + ' K';
                                 
-                            }else{
+                            }else if(value==0){
                                 return '';
+                            }else{
+                                return value;
                             }
                         }
                     }
                 }
             },
-            plugins: [ChartDataLabels]
+            plugins: [ChartDataLabels, topLabels]
         });
 
 
         /*-----------Chart Vertical Bars Group,  Certificacion Mensual---------------------------*/
+        var cant_cert = JSON.parse(document.getElementById('CD2').getAttribute('cant_cert'));
+        var monto_ini_cert = JSON.parse(document.getElementById('CD2').getAttribute('monto_ini_cert'));
+        var monto_fin_cert = JSON.parse(document.getElementById('CD2').getAttribute('monto_fin_cert'));
+        var monto_prom_cert = JSON.parse(document.getElementById('CD2').getAttribute('monto_prom_cert'));
+        
         var ctx2 = document.getElementById('CD2').getContext('2d');
         var myChart2 = new Chart(ctx2, {
             type: 'bar',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'],
 
                 datasets: [{
                     label: 'Costo Original OC',
-                    data: [0, 0.256, 5.4, 2.3,0.367,0,4.8,3.1,0.09],
+                    data: monto_ini_cert,
                     backgroundColor: 'rgb(68,175,105,1)',
                     borderColor: 'rgb(68,175,105,1)',
                     borderWidth: 1,
@@ -427,7 +472,7 @@
                 },
                 {
                     label: 'Costo Diseño',
-                    data: [0, 3.3, 3.4, 4.3,1.3,3,7.6,5.2,3],
+                    data: monto_fin_cert,
                     backgroundColor: 'rgb(180,223,195,1)',
                     borderColor: 'rgb(180,223,195,1)',
                     borderWidth: 1,
@@ -435,7 +480,7 @@
                 },
                 {
                     label: 'Costo Promedio de Diseño',
-                    data: [0, 2, 4, 3,1,1.5,5,5.1],
+                    data: monto_prom_cert,
                     backgroundColor: 'rgb(9,68,39,1)',
                     borderColor: 'rgb(9,68,39,1)',
                     borderWidth: 1,
@@ -463,13 +508,15 @@
                         align: 'top',
                         anchor: 'end',
                         formatter: function(value, context) {
-                            if(value >0 && value <1){
-                                return value*1000 + ' K';
-                            }else if(value >0){
-                                return value;
+                            if(value >1000000 ){
+                                return Math.round(value/1000000*10)/10 + ' MM';
+                            }else if(value >=1000){
+                                return Math.round(value/1000*10)/10 + ' K';
                                 
-                            }else{
+                            }else if(value==0){
                                 return '';
+                            }else{
+                                return value;
                             }
                             
                         }

@@ -14,6 +14,7 @@ from datetime import datetime
 from pykml import parser
 from folium import plugins
 from flaskr.funciones import *
+import numpy as np
 
 bp = Blueprint('presupuesto', __name__)
 
@@ -410,27 +411,41 @@ def importWebpo():
     db = get_db()
     presupuestos = db.execute(
             """
-            SELECT id, cod_unico, ip_madre, fecha_creacion_ipmadre, estado_ipmadre_webPO, eecc
+            SELECT id, cod_unico, ip_madre, fecha_creacion_ipmadre, estado_ipmadre_webPO, eecc, solicitudOC
             FROM presupuesto 
             """
         ).fetchall()
     
     tables_resumenIP = None
+    tables_reporteOC = None
+    tables_info_webpo = None
 
     if request.method == 'POST':
         webPO_resumenIP = request.files["webPO_resumenIP"]
+        webPO_reporteOC = request.files["webPO_reporteOC"]
+        webPO_detallePlanCSV = request.files["webPO_detallePlanCSV"]
+        webPO_itemplanMadre = request.files["webPO_itemplanMadre"]
+        webPO_resu = request.files["webPO_resu"]
 
         error = None
 
         #Validación de Datos y Mostrar Error
         if webPO_resumenIP.filename != '' and not(allowed_file(webPO_resumenIP.filename)):
             error = 'Formato del archivo incorrecto'
+        if webPO_reporteOC.filename != '' and not(allowed_file(webPO_reporteOC.filename)):
+            error = 'Formato del archivo incorrecto'
+        if webPO_detallePlanCSV.filename != '' and not(allowed_file(webPO_detallePlanCSV.filename)):
+            error = 'Formato del archivo incorrecto'
+        if webPO_itemplanMadre.filename != '' and not(allowed_file(webPO_itemplanMadre.filename)):
+            error = 'Formato del archivo incorrecto'
+        if webPO_resu.filename != '' and not(allowed_file(webPO_resu.filename)):
+            error = 'Formato del archivo incorrecto'
 
         if error is not None:
             flash(error)
-
         #Registrar nueva entrada en la base de datos
         else:
+            #Si se cargo archivo Resumen IP Madre
             if webPO_resumenIP.filename != '':
                 filename = secure_filename(webPO_resumenIP.filename)
                 webPO_resumenIP.save(filename)
@@ -494,7 +509,200 @@ def importWebpo():
 
                 os.remove(filename)
 
-    return render_template('presupuesto/importar_webpo.html', tables_resumenIP=tables_resumenIP)
+            #Si se cargo archivo Reporte Orden de Compra
+            if webPO_reporteOC.filename != '':
+                filename = secure_filename(webPO_reporteOC.filename)
+                webPO_reporteOC.save(filename)
+                #Columnas Importantes:
+                #       ITEMPLAN - 10
+                #       CODIGO SOLICITUD - 0
+                #       TIPO OC - 1
+                #       FECHA CREACION - 2
+                df_reporteOC = pd.read_csv('reporte_orden_compra.csv', index_col = False, delimiter='\\t', encoding='latin-1')
+                col_ipmadre = df_reporteOC.columns[10]
+                col_codSol = df_reporteOC.columns[0]
+                col_tipoOC = df_reporteOC.columns[1]
+                col_fechaCrecion = df_reporteOC.columns[2]
+
+                df_reporteOC = df_reporteOC[[col_ipmadre, col_codSol, col_tipoOC, col_fechaCrecion]].copy()
+                df_reporteOC = df_reporteOC.loc[df_reporteOC[col_ipmadre].str.startswith('M-', na=False)]
+                df_reporteOC = df_reporteOC[df_reporteOC[col_tipoOC] == 'CERTIFICACION OC'] 
+                df_reporteOC[col_codSol] = df_reporteOC[col_codSol].str.replace(r'"', '', regex=True)
+                df_reporteOC = df_reporteOC.sort_values(by=col_fechaCrecion, ascending=False)
+
+                #Actualizar campos por IP Madre
+                list_mensaje, list_ipmadre, list_codSol = [], [], []
+                
+                for presupuesto in presupuestos:
+                    if presupuesto['ip_madre'] in df_reporteOC[col_ipmadre].values:
+                        try:
+                            row = df_reporteOC.loc[df_reporteOC[col_ipmadre] == presupuesto['ip_madre']].index[0]
+
+                            list_mensaje.append('Cargado Correctamente')
+                            list_ipmadre.append(presupuesto['ip_madre'])
+                            list_codSol.append(df_reporteOC[col_codSol][row])
+                            if (df_reporteOC[col_codSol][row] != presupuesto['solicitudOC']):
+                                db.execute(
+                                    """
+                                    UPDATE presupuesto 
+                                            SET     solicitudOC = ?
+                                    WHERE ip_madre = ?
+                                    """,
+                                    (df_reporteOC[col_codSol][row], presupuesto['ip_madre'])
+                                )
+                                db.commit()
+                        except:
+                            list_mensaje.append('Error de Carga')
+                            list_ipmadre.append(presupuesto['ip_madre'])
+                            list_codSol.append("-")
+                    else:
+                        db.execute(
+                            """
+                            UPDATE presupuesto 
+                                    SET     solicitudOC = 'Sin solicitud OC'
+                            WHERE ip_madre = ?
+                            """,
+                            (presupuesto['ip_madre'],)
+                        )
+                        db.commit()
+
+                    dict_reporteOC = {'Mensaje': list_mensaje, 'IP Madre': list_ipmadre, 'Código Solicitud OC': list_codSol}
+                    df_reporteOC_rpta = pd.DataFrame(dict_reporteOC)
+                    tables_reporteOC = [df_reporteOC_rpta.to_html(classes='data', header="true")]
+
+                os.remove(filename)
+
+            #Si se cargo archivo Detalle Plan CSV
+            if webPO_detallePlanCSV.filename != '' and webPO_resu.filename != '' and webPO_itemplanMadre.filename != '':
+                filename = secure_filename(webPO_detallePlanCSV.filename)
+                webPO_detallePlanCSV.save(filename)
+                #Columnas Importantes:
+                #       ITEMPLAN - 0	
+                #       PO - 1
+                #   	AREA - 2
+                #	    SISEGO TROBA - 6
+                #   	FECHA CREACION IP - 7
+                #   	FECHA CANCELACION - 11
+                #   	FECHA PRE LIQUIDACION - 12
+                #       ESTADO - 13
+                #       EMP. COLABORADORA - 19
+                #       VALORIZ MANO DE OBRA - 20
+                #       VALORIZ MATERIAL - 21
+                #   	ESTADO PLAN - 26
+
+                df_detallePlanCSV = pd.read_csv('detalleplanCSV.csv', index_col = False, delimiter='\\t', encoding='latin-1')
+                col_ipHijo = df_detallePlanCSV.columns[0]
+                col_area = df_detallePlanCSV.columns[2]
+                col_ipMadre = df_detallePlanCSV.columns[6]
+                col_estadoPO = df_detallePlanCSV.columns[13]
+                col_MdO = df_detallePlanCSV.columns[20]
+ 
+
+                df_detallePlanCSV = df_detallePlanCSV[[col_ipHijo, col_area, col_ipMadre, col_estadoPO, col_MdO]].copy()
+                
+                df_detallePlanCSV = df_detallePlanCSV.loc[df_detallePlanCSV[col_ipMadre].str.startswith('M-', na=False)]
+                df_detallePlanCSV = df_detallePlanCSV.loc[df_detallePlanCSV[col_area].str.startswith('DI', na=False)]   
+                df_detallePlanCSV = df_detallePlanCSV[df_detallePlanCSV[col_estadoPO] != 'CANCELADO'] 
+                df_detallePlanCSV = df_detallePlanCSV[df_detallePlanCSV[col_estadoPO] != 'PRE-CANCELADO'] 
+                df_detallePlanCSV[col_ipHijo] = df_detallePlanCSV[col_ipHijo].str.replace(r'"', '', regex=True)
+                df_detallePlanCSV[col_MdO] = pd.to_numeric(df_detallePlanCSV[col_MdO]) 
+                df_detallePlanCSV = df_detallePlanCSV.groupby([col_ipMadre])[col_MdO].agg('sum').reset_index()
+                df_detallePlanCSV.rename(columns={col_MdO: 'monto_diseño_final', col_ipMadre:'ip_madre'},inplace=True)
+                
+
+
+                #Si se cargo archivo ItemplanMadre
+                filename = secure_filename(webPO_itemplanMadre.filename)
+                webPO_itemplanMadre.save(filename)
+                #Columnas Importantes:
+                #       ITEMPLAN - 0	
+                #		SOLICITUD - 5
+                #		TIPO SOLICITUD - 6
+                #		MONTO - 9
+                #		ESTADO SOLICITUD - 10
+                #		FECHA CREACION - 11
+                #		FECHA VALIDACION - 12
+                #		ESTADO FIRMA - 13
+                #		ESTADO ITEM MADRE - 19
+
+
+                df_itemplanMadre = pd.read_csv('ItemplanMadre_cv.csv', index_col = False, delimiter='\\t', encoding='latin-1')
+                col_ipMadre = df_itemplanMadre.columns[0]
+                col_solicitud = df_itemplanMadre.columns[5]
+                col_tipoSol = df_itemplanMadre.columns[6]
+                col_monto = df_itemplanMadre.columns[8]
+                col_estadoSol = df_itemplanMadre.columns[9]
+                col_fechaCreacion = df_itemplanMadre.columns[10]
+                col_fechaValidacion = df_itemplanMadre.columns[11]
+                col_estadoFirma = df_itemplanMadre.columns[12]
+ 
+
+                df_itemplanMadre = df_itemplanMadre[[col_ipMadre, col_tipoSol, col_monto, col_estadoSol, col_fechaCreacion, col_fechaValidacion, col_estadoFirma]].copy()
+                df_itemplanMadre[col_fechaCreacion] = df_itemplanMadre[col_fechaCreacion].str.replace('0000-00-00', '', regex=True)
+                df_itemplanMadre[col_fechaValidacion] = df_itemplanMadre[col_fechaValidacion].str.replace('0000-00-00', '', regex=True)
+                df_itemplanMadre[col_ipMadre] = df_itemplanMadre[col_ipMadre].str.replace(r'"', '', regex=True)
+                df_itemplanMadre = df_itemplanMadre.loc[df_itemplanMadre[col_ipMadre].str.startswith('M-', na=False)]
+                df_itemplanMadre[col_monto] = df_itemplanMadre[col_monto].str.replace(',', '').astype(float)
+                df_itemplanMadre[col_fechaCreacion] = pd.to_datetime(df_itemplanMadre[col_fechaCreacion])
+                df_itemplanMadre[col_fechaValidacion] = pd.to_datetime(df_itemplanMadre[col_fechaValidacion])
+                df_itemplanMadre = df_itemplanMadre.sort_values(by=col_fechaCreacion, ascending=False)
+                df_itemplanMadre[col_fechaCreacion] = df_itemplanMadre[col_fechaCreacion].dt.date
+                df_itemplanMadre[col_fechaValidacion] = df_itemplanMadre[col_fechaValidacion].dt.date
+                
+
+
+                df_itemplanMadre_primera_OC = df_itemplanMadre.loc[df_itemplanMadre[col_tipoSol].str.startswith('CREACION', na=False)]
+                df_itemplanMadre_primera_OC = df_itemplanMadre_primera_OC.drop_duplicates(subset=col_ipMadre).reset_index(drop=True)
+                df_itemplanMadre_primera_OC.rename(columns={col_monto: 'monto_inicial', col_fechaValidacion: 'validacion_oc_creacion', col_fechaCreacion:'solicitud_oc_creacion', col_ipMadre:'ip_madre'},inplace=True)
+                df_itemplanMadre_primera_OC.drop(columns=[col_estadoFirma,col_tipoSol,col_estadoSol], inplace=True)
+
+                df_itemplanMadre_ultima_OC = df_itemplanMadre.drop_duplicates(subset=col_ipMadre).reset_index(drop=True)
+                df_itemplanMadre_ultima_OC.rename(columns={col_monto: 'monto_actual', col_fechaValidacion: 'validacion_oc_actual', col_fechaCreacion:'solicitud_oc_actual', col_estadoSol:'estado_solicitud_actual', col_ipMadre:'ip_madre', col_tipoSol:'tipo_solicitud', col_estadoFirma:'estado_firma'},inplace=True)
+        
+
+
+                filename = secure_filename(webPO_resu.filename)
+                webPO_resu.save(filename)
+                #Columnas Importantes:
+                #       IP MADRES - 0
+                #       ESTADO ITEM. MADRE - 1
+                #       FECHA RECEPCION - 16
+                #       MONTO - 11
+                #       NOMBRE IP MADRE - 3
+                #       EECC - 13
+                #       SITUACION - 10
+                #       PEP - 8
+
+                df_resumenIP = pd.read_csv(filename, delimiter='\\t', encoding='latin-1')
+                col_ipmadre = df_resumenIP.columns[0]
+                col_estadoIp = df_resumenIP.columns[1]
+                col_fechaRec = df_resumenIP.columns[16]
+                col_eecc = df_resumenIP.columns[13]
+                col_pep = df_resumenIP.columns[8]
+                col_situacion = df_resumenIP.columns[10]
+
+                df_resumenIP = df_resumenIP[[col_ipMadre, col_estadoIp, col_fechaRec, col_eecc, col_pep, col_situacion]].copy()
+                df_resumenIP[col_ipmadre] = df_resumenIP[col_ipmadre].str.replace(r'"', '', regex=True)
+                df_resumenIP[col_fechaRec] = df_resumenIP[col_fechaRec].str.replace('00/00/0000/', '', regex=True).str[:-1]
+                df_resumenIP[col_fechaRec] = pd.to_datetime(df_resumenIP[col_fechaRec], format="%d/%m/%Y").dt.date
+                df_resumenIP.rename(columns={col_ipMadre:'ip_madre', col_situacion:'situacion', col_eecc:'eecc', col_estadoIp:'estado_ip', col_fechaRec:'fecha_recepcion', col_pep:'pep'},inplace=True)
+                
+
+                df_info_webpo = pd.merge(df_resumenIP, df_itemplanMadre_ultima_OC, how='left', on=['ip_madre'])
+                df_info_webpo = pd.merge(df_info_webpo, df_detallePlanCSV, how='left', on=['ip_madre'])
+                df_info_webpo = pd.merge(df_info_webpo, df_itemplanMadre_primera_OC, how='left', on=['ip_madre'])
+                
+                df_info_webpo.to_sql(name='info_webpo', con=db, if_exists='replace', index=False, dtype={'ip_madre': 'PRIMARY KEY'})
+
+
+                tables_info_webpo=[df_info_webpo.to_html(classes='data', header="true")]
+            elif webPO_detallePlanCSV.filename == '' and webPO_resu.filename == '' and webPO_itemplanMadre.filename == '':
+                pass
+            else:
+                flash("Se deben cargar los archivos detallePlanCSV, ItemplanMadre_Resumen y ItemplanMadre_cv")
+                 
+
+    return render_template('presupuesto/importar_webpo.html', tables_resumenIP=tables_resumenIP, tables_reporteOC=tables_reporteOC,  tables_info_webpo=tables_info_webpo)
 
 
 @bp.route('/comentario/presupuesto/<string:id>/<string:comentario>')
